@@ -1,4 +1,4 @@
-# GAMA 2024-06 - Next release of GAMA
+# GAMA 1.9.3 - Do not commit
 
 Due to several bugfixes in the recent versions of SWT, the _highly recommended configuration_ for working on this branch is  [Eclipse for Java and DSL 2023-12](https://www.eclipse.org/downloads/packages/release/2023-12/r/eclipse-ide-java-and-dsl-developers) and the [Temurin distribution of JDK17](https://adoptium.net).
 
