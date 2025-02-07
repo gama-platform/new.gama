@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ import gama.core.common.GamlFileExtension;
 import gama.core.common.interfaces.IKeyword;
 import gama.core.kernel.experiment.ExperimentAgent;
 import gama.core.kernel.experiment.IExperimentPlan;
+import gama.core.kernel.experiment.IParameter;
 import gama.core.kernel.experiment.ITopLevelAgent;
 import gama.core.kernel.model.IModel;
 import gama.core.metamodel.agent.AgentReference;
@@ -59,8 +61,11 @@ import gama.gaml.compilation.GamaCompilationFailedException;
 import gama.gaml.compilation.GamlCompilationError;
 import gama.gaml.compilation.GamlIdiomsProvider;
 import gama.gaml.operators.Cast;
+import gama.gaml.species.ISpecies;
+import gama.gaml.statements.ActionStatement;
 import gama.gaml.statements.Arguments;
 import gama.gaml.statements.IExecutable;
+import gama.gaml.variables.IVariable;
 
 /**
  * The Class DefaultServerCommands.
@@ -460,6 +465,104 @@ public class DefaultServerCommands {
 			ex.printStackTrace();
 			return new CommandResponse(GamaServerMessage.Type.UnableToExecuteRequest, ex.getMessage(), map, false);
 		}
+	}
+
+	/**
+	 * Description.
+	 *
+	 * @author Johary Rakotomalala (johary.rakotomalala.31@gmail.com)
+	 * @param socket
+	 *            the socket
+	 * @param map
+	 *            the map
+	 * @return the command response
+	 * @date 24 jan. 2025
+	 */
+	public static GamaServerMessage DESCRIBE(final GamaWebSocketServer server, final WebSocket socket,
+			final IMap<String, Object> map) {
+		// Check the parameters
+		final Object modelPath = map.get("model");
+		if (modelPath == null) return new CommandResponse(MalformedRequest,
+				"For 'describe', mandatory parameter is: 'model'", map, false);
+		String pathToModel = modelPath.toString().trim();
+		File ff = new File(pathToModel);
+		if (!ff.exists()) return new CommandResponse(UnableToExecuteRequest,
+				"'" + ff.getAbsolutePath() + "' does not exist", map, false);
+		if (!GamlFileExtension.isGaml(ff.getAbsoluteFile().toString()))
+			return new CommandResponse(GamaServerMessage.Type.UnableToExecuteRequest,
+					"'" + ff.getAbsolutePath() + "' is not a gaml file", map, false);
+		IModel model = null;
+		try {
+			List<GamlCompilationError> errors = new ArrayList<>();
+			model = GAML.getModelBuilder().compile(ff, errors, null);
+		}
+		catch (GamaCompilationFailedException compError) {
+			return new CommandResponse(UnableToExecuteRequest, compError.toJsonString(), map, true);
+		}
+		catch (IOException e) {
+			return new CommandResponse(UnableToExecuteRequest,
+					"Impossible to compile '" + ff.getAbsolutePath() + "' because of " + e.getMessage(), map, false);
+		}
+		Map<String, Object> res = new HashMap<String, Object>();
+		List<Object> resAllExperiments = new ArrayList<Object>();
+		// Get the experiments informations
+		for (IExperimentPlan ittExp : model.getExperiments()) {
+			// Get the parameters
+			Map<String, Object> resExp = new HashMap<String, Object>();
+			resExp.put("name", ittExp.getName());
+			List<Object> resAllParams = new ArrayList<Object>();
+			for (Map.Entry<String,IParameter> paramEntry : ittExp.getParameters().entrySet()) {
+				Map<String, Object> resParam = new HashMap<String, Object>();
+				IParameter param = paramEntry.getValue();
+				resParam.put("name", param.getName());
+				resParam.put("description", param.getTitle());
+				resParam.put("type", param.getType().toString());
+				resAllParams.add(resParam);
+			}
+			resExp.put("parameters", resAllParams);
+			resAllExperiments.add(resExp);
+		}
+		// Get the species informations
+		List<Object> resAllSpecies = new ArrayList<Object>();		
+		for (Map.Entry<String,ISpecies> specieEntry : model.getAllSpecies().entrySet()) {
+			ISpecies specie = specieEntry.getValue();
+			Map<String, Object> resSpecie = new HashMap<String, Object>();
+			resSpecie.put("name", specie.getName());
+			// Variables
+			List<Object> resAllVariables = new ArrayList<Object>();		
+			for (IVariable variable: specie.getVars()) {
+				Map<String, Object> resVariable = new HashMap<String, Object>();
+				resVariable.put("name", variable.getName());
+				resVariable.put("type", variable.getType().getName());
+				resAllVariables.add(resVariable);
+			}
+			// Actions
+			List<Object> resAllActions = new ArrayList<Object>();		
+			for (ActionStatement action : specie.getActions()) {
+				Map<String, Object> resAction = new HashMap<String, Object>();
+				resAction.put("name", action.getName());
+				List<Object> resAllCommands  = new ArrayList<Object>();
+				gama.gaml.statements.IStatement[] aCommands = action.getCommands();
+				if (aCommands != null) {
+					for (gama.gaml.statements.IStatement c : aCommands) {
+						Map<String, Object> command = new HashMap<String, Object>();
+						command.put("name", c.getDescription().getName());
+						command.put("type", c.getDescription().getGamlType().getName());
+						resAllCommands.add(command);
+					}
+				}
+				resAction.put("parameters", resAllCommands);
+				resAllActions.add(resAction);
+			}
+			resSpecie.put("variables", resAllVariables);
+			resSpecie.put("actions", resAllActions);
+			resAllSpecies.add(resSpecie);
+		}
+		res.put("species", resAllSpecies);
+		res.put("experiments", resAllExperiments);
+		res.put("name", model.getName());
+		res.put("path", pathToModel);
+		return new CommandResponse(CommandExecutedSuccessfully, res, map, false);
 	}
 
 	/**

@@ -24,6 +24,7 @@ import static gama.core.runtime.server.ISocketCommand.STEPBACK;
 import static gama.core.runtime.server.ISocketCommand.STOP;
 import static gama.core.runtime.server.ISocketCommand.UPLOAD;
 import static gama.core.runtime.server.ISocketCommand.VALIDATE;
+import static gama.core.runtime.server.ISocketCommand.DESCRIBE;
 import static java.util.Map.entry;
 
 import java.util.AbstractMap;
@@ -163,7 +164,8 @@ public class CommandExecutor {
 					entry(RELOAD, DefaultServerCommands::RELOAD), entry(EXPRESSION, DefaultServerCommands::EVAL),
 					entry(EVALUATE, DefaultServerCommands::EVAL), entry(EXIT, DefaultServerCommands::EXIT),
 					entry(DOWNLOAD, DefaultServerCommands::DOWNLOAD), entry(UPLOAD, DefaultServerCommands::UPLOAD),
-					entry(ASK, DefaultServerCommands::ASK), entry(VALIDATE, DefaultServerCommands::VALIDATE));
+					entry(ASK, DefaultServerCommands::ASK), entry(VALIDATE, DefaultServerCommands::VALIDATE),
+					entry(DESCRIBE, DefaultServerCommands::DESCRIBE));
 		}
 		return DEFAULT_COMMANDS;
 	}

@@ -123,6 +123,9 @@ public interface ISocketCommand {
 	/** The upload. */
 	String UPLOAD = "upload";
 
+	/** The description. */
+	String DESCRIBE = "describe";
+
 	/** The ask. This action allows to ask an agent to execute an action */
 	String ASK = IKeyword.ASK;
 
