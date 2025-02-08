@@ -9,67 +9,67 @@
  ********************************************************************************************************/
 package gama.core.common;
 
-import gama.core.common.interfaces.IGui;
-import gama.core.common.interfaces.IStatusMessage;
+import gama.core.common.interfaces.IUpdaterMessage;
+import gama.core.runtime.IScope;
+import gama.core.runtime.exceptions.GamaRuntimeException;
+import gama.core.util.GamaColor;
 
 /**
  * The Class StatusMessage.
  */
-public class StatusMessage implements IStatusMessage {
+public record StatusMessage(String message, StatusType type, String icon, GamaColor color, Boolean begin,
+		Double completion, GamaRuntimeException exception) implements IUpdaterMessage {
 
-	/** The message. */
-	String message = "";
+	static GamaColor WAIT_AND_TASK_COLOR = GamaColor.get(207, 119, 56);
+	static GamaColor INFORM_COLOR = GamaColor.get(102, 114, 126);
+	static GamaColor ERROR_COLOR = GamaColor.get(158, 77, 77);
+	static GamaColor NEUTRAL_COLOR = GamaColor.get(102, 114, 126);
 
-	/** The code. */
-	protected int code = IGui.INFORM;
-
-	/** The icon. */
-	protected String icon;
-
-	/**
-	 * Instantiates a new status message.
-	 *
-	 * @param msg
-	 *            the msg
-	 * @param s
-	 *            the s
-	 */
-	public StatusMessage(final String msg, final int s) {
-		message = msg;
-		code = s;
+	public static StatusMessage USER(final String msg, final String icon, final GamaColor color) {
+		return new StatusMessage(msg, StatusType.USER, icon, color, null, null, null);
 	}
 
-	/**
-	 * Instantiates a new status message.
-	 *
-	 * @param msg
-	 *            the msg
-	 * @param s
-	 *            the s
-	 * @param icon
-	 *            the icon
-	 */
-	public StatusMessage(final String msg, final int s, final String icon) {
-		message = msg;
-		this.icon = icon;
-		code = s;
+	public static StatusMessage WAIT(final String msg) {
+		return new StatusMessage(msg, StatusType.WAIT, null, WAIT_AND_TASK_COLOR, true, null, null);
+	}
+
+	public static StatusMessage INFORM(final String msg) {
+		return new StatusMessage(msg, StatusType.INFORM, null, INFORM_COLOR, true, null, null);
+	}
+
+	public static StatusMessage ERROR(final IScope scope, final Exception e) {
+		return new StatusMessage("Error in previous experiment", StatusType.ERROR, "overlays/small.close", ERROR_COLOR,
+				null, null, GamaRuntimeException.create(e, scope));
+	}
+
+	public static StatusMessage BEGIN(final String msg) {
+		return new StatusMessage(msg, StatusType.SUBTASK, PROGRESS_ICON, WAIT_AND_TASK_COLOR, true, null, null);
+	}
+
+	public static StatusMessage END(final String msg) {
+		return new StatusMessage(msg, StatusType.SUBTASK, PROGRESS_ICON, WAIT_AND_TASK_COLOR, false, null, null);
+	}
+
+	public static StatusMessage COMPLETION(final String msg, final Double completion) {
+		return new StatusMessage(msg, StatusType.SUBTASK, PROGRESS_ICON, WAIT_AND_TASK_COLOR, false, completion, null);
+	}
+
+	public static StatusMessage CUSTOM(final String msg, final StatusType s, final String icon) {
+		return CUSTOM(msg, s, icon, NEUTRAL_COLOR);
+	}
+
+	public static StatusMessage CUSTOM(final String msg, final StatusType s, final String icon, final GamaColor color) {
+		return new StatusMessage(msg, s, icon, color, null, null, null);
+	}
+
+	private static StatusMessage EXPERIMENT =
+			new StatusMessage(null, StatusType.EXPERIMENT, null, null, null, null, null);
+
+	public static StatusMessage EXPERIMENT() {
+		return EXPERIMENT;
 	}
 
 	@Override
-	public String getText() { return message; }
-
-	@Override
-	public int getCode() { return code; }
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gama.core.common.IStatusMessage#getIcon()
-	 */
-	@Override
-	public String getIcon() { return icon; }
-
-	@Override
-	public StatusMessageType getType() { return StatusMessageType.STATUS; }
+	public StatusType getType() { return type(); }
 
 }

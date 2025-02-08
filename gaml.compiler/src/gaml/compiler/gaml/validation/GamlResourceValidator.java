@@ -26,6 +26,8 @@ import org.eclipse.xtext.validation.Issue;
 
 import com.google.inject.Inject;
 
+import gama.core.runtime.GAMA;
+import gama.core.util.GamaColor;
 import gama.dev.DEBUG;
 import gaml.compiler.gaml.resource.GamlResource;
 import gaml.compiler.gaml.resource.GamlResourceServices;
@@ -75,10 +77,13 @@ public class GamlResourceValidator implements IResourceValidator {
 		// DEBUG.OUT("GamlResourceValidator beginning validation job of " + resource.getURI().lastSegment());
 		String name = org.eclipse.emf.common.util.URI.decode(resource.getURI().lastSegment());
 		ArrayList<Issue> result = new ArrayList<>();
+		GAMA.getGui().getStatus().setStatus(null, "Compilation of " + name, "navigator/files/file.text",
+				GamaColor.get(200, 200, 200));
 		DEBUG.TIMER("COMPIL", name, "in", () -> {
-			final IAcceptor<Issue> acceptor =
-					issue -> { if (issue.getMessage() != null && !issue.getMessage().isEmpty()) { result.add(issue); } };
-			// We resolve the cross references
+			final IAcceptor<Issue> acceptor = issue -> {
+				if (issue.getMessage() != null && !issue.getMessage().isEmpty()) { result.add(issue); }
+			};
+			// We resolve the cross referencesb
 			EcoreUtil2.resolveLazyCrossReferences(resource, indicator);
 			// DEBUG.OUT("Cross references resolved for " + resource.getURI().lastSegment());
 			// And collect the syntax / linking issues

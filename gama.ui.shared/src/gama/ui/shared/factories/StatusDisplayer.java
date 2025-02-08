@@ -8,20 +8,15 @@
  * Visit https://github.com/gama-platform/gama for license information and contacts.
  *
  ********************************************************************************************************/
-package gama.ui.experiment.factories;
+package gama.ui.shared.factories;
 
-import gama.core.common.ErrorStatusMessage;
 import gama.core.common.StatusMessage;
-import gama.core.common.SubTaskMessage;
-import gama.core.common.UserStatusMessage;
-import gama.core.common.interfaces.IGui;
 import gama.core.common.interfaces.IStatusDisplayer;
-import gama.core.common.interfaces.IStatusMessage;
+import gama.core.common.interfaces.IUpdaterMessage.StatusType;
 import gama.core.kernel.experiment.ITopLevelAgent;
 import gama.core.runtime.GAMA;
 import gama.core.runtime.IScope;
 import gama.core.util.GamaColor;
-import gama.ui.experiment.controls.StatusControlContribution;
 import gama.ui.shared.utils.ThreadedUpdater;
 
 /**
@@ -30,13 +25,14 @@ import gama.ui.shared.utils.ThreadedUpdater;
 public class StatusDisplayer implements IStatusDisplayer {
 
 	/** The status. */
-	private final ThreadedUpdater<IStatusMessage> status = new ThreadedUpdater<>("Status refresh");
+	private final ThreadedUpdater<StatusMessage> status = new ThreadedUpdater<>("Status refresh");
 
 	/**
 	 * Instantiates a new status displayer.
 	 */
 	StatusDisplayer() {
-		status.setTarget(StatusControlContribution.getInstance(), null);
+		// status.setExperimentTarget(ExperimentControlContribution.getInstance());
+		// status.setStatusTarget(StatusControlContribution.getInstance());
 		GAMA.registerTopLevelAgentChangeListener(this);
 	}
 
@@ -50,7 +46,7 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 */
 	@Override
 	public void topLevelAgentChanged(final ITopLevelAgent agent) {
-		informStatus(agent.getScope(), null, "overlays/status.clock");
+		updateExperimentStatus(agent.getScope());
 	}
 
 	/**
@@ -63,7 +59,7 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 */
 	@Override
 	public void waitStatus(final IScope scope, final String string) {
-		setStatus(string, IGui.WAIT);
+		setStatus(string, StatusType.WAIT);
 	}
 
 	/**
@@ -76,7 +72,7 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 */
 	@Override
 	public void informStatus(final IScope scope, final String string) {
-		setStatus(string, IGui.INFORM);
+		setStatus(string, StatusType.INFORM);
 	}
 
 	/**
@@ -89,20 +85,7 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 */
 	@Override
 	public void errorStatus(final IScope scope, final Exception error) {
-		setStatus(error);
-	}
-
-	/**
-	 * Neutral status.
-	 *
-	 * @param message
-	 *            the message
-	 * @param scope
-	 *            the scope
-	 */
-	@Override
-	public void neutralStatus(final IScope scope, final String message) {
-		setStatus(message, IGui.NEUTRAL);
+		status.updateWith(StatusMessage.ERROR(scope, error));
 	}
 
 	/**
@@ -113,27 +96,8 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @param code
 	 *            the code
 	 */
-	private void setStatus(final String msg, final int code) {
-		status.updateWith(new StatusMessage(msg, code));
-	}
-
-	private void setStatus(final Exception error) {
-		status.updateWith(new ErrorStatusMessage(error));
-	}
-
-	/**
-	 * Sets the status.
-	 *
-	 * @author Alexis Drogoul (alexis.drogoul@ird.fr)
-	 * @param msg
-	 *            the msg
-	 * @param icon
-	 *            the icon
-	 * @date 14 août 2023
-	 */
-	@Override
-	public void setStatus(final IScope scope, final String msg, final String icon) {
-		setStatusInternal(msg, null, icon);
+	private void setStatus(final String msg, final StatusType code) {
+		status.updateWith(StatusMessage.CUSTOM(msg, code, null));
 	}
 
 	/**
@@ -143,8 +107,8 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @date 14 août 2023
 	 */
 	@Override
-	public void resumeStatus(final IScope scope) {
-		status.resume();
+	public void resetStatus(final IScope scope) {
+		status.reset();
 	}
 
 	/**
@@ -156,8 +120,8 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @date 14 août 2023
 	 */
 	@Override
-	public void setSubStatusCompletion(final IScope scope, final double s) {
-		status.updateWith(new SubTaskMessage(s));
+	public void setTaskCompletion(final IScope scope, final double s) {
+		status.updateWith(StatusMessage.COMPLETION("", s));
 	}
 
 	/**
@@ -171,8 +135,8 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @date 14 août 2023
 	 */
 	@Override
-	public void informStatus(final IScope scope, final String string, final String icon) {
-		status.updateWith(new StatusMessage(string, IGui.INFORM, icon));
+	public void updateExperimentStatus(final IScope scope) {
+		status.updateWith(StatusMessage.EXPERIMENT());
 	}
 
 	/**
@@ -184,8 +148,8 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @date 14 août 2023
 	 */
 	@Override
-	public void beginSubStatus(final IScope scope, final String name) {
-		status.updateWith(new SubTaskMessage(name, true));
+	public void beginTask(final IScope scope, final String name) {
+		status.updateWith(StatusMessage.BEGIN(name));
 	}
 
 	/**
@@ -197,8 +161,8 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @date 14 août 2023
 	 */
 	@Override
-	public void endSubStatus(final IScope scope, final String name) {
-		status.updateWith(new SubTaskMessage(name, false));
+	public void endTask(final IScope scope, final String name) {
+		status.updateWith(StatusMessage.END(name));
 	}
 
 	/**
@@ -211,8 +175,8 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @param icon
 	 *            the icon
 	 */
-	private void setStatusInternal(final String msg, final GamaColor color, final String icon) {
-		status.updateWith(new UserStatusMessage(msg, color, icon));
+	private void setUserStatus(final String msg, final GamaColor color, final String icon) {
+		status.updateWith(StatusMessage.USER(msg, icon, color));
 	}
 
 	/**
@@ -226,13 +190,15 @@ public class StatusDisplayer implements IStatusDisplayer {
 	 * @date 14 août 2023
 	 */
 	@Override
-	public void setStatus(final IScope scope, final String message, final GamaColor color) {
+	public void setStatus(final IScope scope, final String message, final String icon, final GamaColor color) {
 		if (message == null) {
-			resumeStatus(scope);
+			resetStatus(scope);
 		} else {
-			setStatusInternal(message, color, null);
+			setUserStatus(message, color, icon);
 		}
 
 	}
+
+	public ThreadedUpdater getThreadedUpdater() { return status; }
 
 }
