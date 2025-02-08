@@ -21,6 +21,7 @@ import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import gama.core.metamodel.shape.GamaPoint;
+import gama.core.metamodel.shape.IShape;
 import gama.core.outputs.layers.properties.ILightDefinition;
 import gama.ui.display.opengl.OpenGL;
 import gama.ui.display.opengl.renderer.IOpenGLRenderer;
@@ -173,7 +174,8 @@ public class LightHelper extends AbstractRendererHelper {
 			axis = GamaPoint.cross(axis, dir);
 			openGL.rotateBy(Math.toDegrees(-angle) + 180, axis.x, axis.y, axis.z);
 			openGL.translateBy(0, 0, -size);
-			glut.glutSolidCone(baseSize, size, 16, 16);
+			openGL.scaleBy(size / 2, size / 2, size);
+			openGL.drawCachedGeometry(IShape.Type.CONE, null);
 			openGL.popMatrix();
 		} else {
 			// draw direction light : a line and an sphere at the end of the line.
