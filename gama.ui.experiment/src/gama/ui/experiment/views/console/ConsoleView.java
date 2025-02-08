@@ -1,12 +1,12 @@
 /*******************************************************************************************************
  *
- * ConsoleView.java, in gama.ui.experiment, is part of the source code of the
- * GAMA modeling and simulation platform (v.2024-06).
+ * ConsoleView.java, in gama.ui.experiment, is part of the source code of the GAMA modeling and simulation platform
+ * (v.2024-06).
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, ESPACE-DEV, CTU)
  *
  * Visit https://github.com/gama-platform/gama for license information and contacts.
- * 
+ *
  ********************************************************************************************************/
 package gama.ui.experiment.views.console;
 
@@ -124,7 +124,7 @@ public class ConsoleView extends GamaViewPart implements IToolbarDecoratedView.S
 	private Color getColorFor(final ITopLevelAgent root, final GamaUIColor requested) {
 		final GamaUIColor result =
 				requested == null ? root == null ? IGamaColors.BLACK : GamaColors.get(root.getColor()) : requested;
-		return ThemeHelper.isDark() ? result.lighter() : result.color();
+		return ThemeHelper.isDark() ? result.lighter(0.6f) : result.color();
 	}
 
 	/** The indicated. */

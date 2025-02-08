@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * GamaColors.java, in gama.ui.shared.shared, is part of the source code of the GAMA modeling and simulation platform
- * .
+ * GamaColors.java, in gama.ui.shared.shared, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -11,12 +10,14 @@
 package gama.ui.shared.resources;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Control;
 
 import gama.core.util.GamaColor;
+import gama.dev.DEBUG;
 import gama.ui.application.workbench.ThemeHelper;
 import gama.ui.shared.utils.WorkbenchHelper;
 
@@ -29,13 +30,19 @@ import gama.ui.shared.utils.WorkbenchHelper;
  */
 public class GamaColors {
 
+	static {
+		DEBUG.OFF();
+	}
+
 	/**
 	 * The Class GamaUIColor.
 	 */
 	public static class GamaUIColor {
 
 		/** The reverse. */
-		Color active, inactive, darker, gray, lighter, reverse;
+		Color active, inactive, darker, gray, reverse;
+
+		Map<Float, Color> lighterColors;
 
 		/**
 		 * Instantiates a new gama UI color.
@@ -116,7 +123,16 @@ public class GamaColors {
 		 * @return the color
 		 */
 		public Color lighter() {
-			if (lighter == null) { lighter = computeLighter(active); }
+			return lighter(0.2f);
+		}
+
+		public Color lighter(final float percentage) {
+			if (lighterColors == null) { lighterColors = new HashMap<>(); }
+			Color lighter = lighterColors.get(percentage);
+			if (lighter != null) return lighter;
+			DEBUG.OUT("Computing new lighter color with " + percentage);
+			lighter = computeLighter(active, percentage);
+			lighterColors.put(percentage, lighter);
 			return lighter;
 		}
 
@@ -197,13 +213,14 @@ public class GamaColors {
 	 *            the c
 	 * @return the color
 	 */
-	static Color computeLighter(final Color c) {
+
+	static Color computeLighter(final Color c, final float percentage) {
 		final var data = c.getRGB();
 		final var hsb = data.getHSB();
 		final var newHsb = new float[3];
 		newHsb[0] = hsb[0];
 		newHsb[1] = hsb[1];
-		newHsb[2] = Math.min(1f, hsb[2] + 0.2f);
+		newHsb[2] = Math.min(1f, hsb[2] + percentage);
 		final var newData = new RGB(newHsb[0], newHsb[1], newHsb[2]);
 		return getColor(newData.red, newData.green, newData.blue);
 	}
