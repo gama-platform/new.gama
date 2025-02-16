@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * GamaSVGFile.java, in gama.extension.image, is part of the source code of the GAMA modeling and simulation
- * platform .
+ * GamaSVGFile.java, in gama.extension.image, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -462,9 +461,9 @@ public class GamaSVGFile extends GamaGeometryFile {
 		Geometry g = ShapeReader.read(it, GeometryUtils.GEOMETRY_FACTORY);
 		g = GeometryUtils.cleanGeometry(g);
 		GamaShape gs = GamaShapeFactory.createFrom(g);
-		DEBUG.OUT("Adding shape with type " + gs.getInnerGeometry().getGeometryType() + " envelope "
-				+ gs.getEnvelope().getWidth() + " " + gs.getEnvelope().getHeight() + " at " + gs.getEnvelope().getMinX()
-				+ " " + gs.getEnvelope().getMinY());
+		// DEBUG.OUT("Adding shape with type " + gs.getInnerGeometry().getGeometryType() + " envelope "
+		// + gs.getEnvelope().getWidth() + " " + gs.getEnvelope().getHeight() + " at " + gs.getEnvelope().getMinX()
+		// + " " + gs.getEnvelope().getMinY());
 		getBuffer().add(gs);
 	}
 
@@ -475,8 +474,8 @@ public class GamaSVGFile extends GamaGeometryFile {
 		try {
 			parseGroup(getDocument(scope).getDocumentElement(), new AffineTransform());
 			Envelope3D env = Envelope3D.of(getBuffer());
-			DEBUG.OUT("Total resulting envelope " + env.getWidth() + " " + env.getHeight() + " at " + env.getMinX()
-					+ " " + env.getMinY());
+			// DEBUG.OUT("Total resulting envelope " + env.getWidth() + " " + env.getHeight() + " at " + env.getMinX()
+			// + " " + env.getMinY());
 			for (IShape s : getBuffer()) { s.setLocation(s.getLocation().minus(env.getMinX(), env.getMinY(), 0)); }
 		} catch (final Exception e) {
 			throw GamaRuntimeException.create(e, scope);
