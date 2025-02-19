@@ -1,16 +1,17 @@
 /*******************************************************************************************************
  *
- * GamlAccessEntry.java, in gama.ui.shared.shared, is part of the source code of the
- * GAMA modeling and simulation platform .
+ * GamlAccessEntry.java, in gama.ui.shared.shared, is part of the source code of the GAMA modeling and simulation
+ * platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
  * Visit https://github.com/gama-platform/gama for license information and contacts.
- * 
+ *
  ********************************************************************************************************/
 
 package gama.ui.shared.access;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.TextLayout;
@@ -29,22 +30,22 @@ import gama.ui.shared.utils.WorkbenchHelper;
  * The Class GamlAccessEntry.
  */
 public class GamlAccessEntry {
-	
+
 	/** The first in category. */
 	boolean firstInCategory;
-	
+
 	/** The last in category. */
 	boolean lastInCategory;
-	
+
 	/** The element. */
 	IGamlDescription element;
-	
+
 	/** The provider. */
 	GamlIdiomsProvider<?> provider;
-	
+
 	/** The element match regions. */
 	int[][] elementMatchRegions;
-	
+
 	/** The provider match regions. */
 	int[][] providerMatchRegions;
 
@@ -54,6 +55,24 @@ public class GamlAccessEntry {
 	 * filter being applied.
 	 */
 	private final int matchQuality;
+
+	static TextStyle boldStyle, categoryStyle;
+
+	static TextStyle getBoldStyle() {
+		if (boldStyle == null) {
+			boldStyle = new TextStyle(WorkbenchHelper.getDisplay().getSystemFont(), null,
+					ThemeHelper.isDark() ? IGamaColors.BLUE.color() : IGamaColors.TOOLTIP.color());
+		}
+		return boldStyle;
+	}
+
+	static TextStyle getCategoryStyle() {
+		if (categoryStyle == null) {
+			categoryStyle = new TextStyle(WorkbenchHelper.getDisplay().getSystemFont(), null,
+					ThemeHelper.isDark() ? IGamaColors.BLUE.color() : IGamaColors.TOOLTIP.color());
+		}
+		return categoryStyle;
+	}
 
 	/**
 	 * Indicates the filter string was a perfect match to the label or there is no filter applied
@@ -77,6 +96,13 @@ public class GamlAccessEntry {
 	 * @see #getMatchQuality()
 	 */
 	public static final int MATCH_GOOD = 10;
+
+	/**
+	 * Indicates only part of the filter string matches to the element's label.
+	 *
+	 * @see #getMatchQuality()
+	 */
+	public static final int MATCH_PARTIAL = 15;
 
 	/**
 	 * Creates a new quick access entry from the given element and provider. If no filter was used to match this entry
@@ -130,15 +156,15 @@ public class GamlAccessEntry {
 	 *
 	 * @return the search category
 	 */
-	public String getSearchCategory() {
-		return provider.getSearchCategory();
-	}
+	public String getSearchCategory() { return provider.getSearchCategory(); }
 
 	/**
 	 * Measure.
 	 *
-	 * @param event the event
-	 * @param textLayout the text layout
+	 * @param event
+	 *            the event
+	 * @param textLayout
+	 *            the text layout
 	 */
 	public void measure(final Event event, final TextLayout textLayout) {
 		// final Table table = ((TableItem) event.item).getParent();
@@ -148,11 +174,9 @@ public class GamlAccessEntry {
 			case 0:
 				// textLayout.setFont(GamaFonts.categoryHelpFont);
 				if (firstInCategory || providerMatchRegions.length > 0) {
-					final TextStyle boldStyle = new TextStyle(WorkbenchHelper.getDisplay().getSystemFont(), null,
-							ThemeHelper.isDark() ? IGamaColors.BLUE.color() : IGamaColors.TOOLTIP.color());
 					textLayout.setText(provider.name);
 					for (final int[] matchRegion : providerMatchRegions) {
-						textLayout.setStyle(boldStyle, matchRegion[0], matchRegion[1]);
+						textLayout.setStyle(getCategoryStyle(), matchRegion[0], matchRegion[1]);
 					}
 				} else {
 					textLayout.setText(""); //$NON-NLS-1$
@@ -160,10 +184,8 @@ public class GamlAccessEntry {
 				break;
 			case 1:
 				textLayout.setText(element.getTitle());
-				final TextStyle boldStyle = new TextStyle(WorkbenchHelper.getDisplay().getSystemFont(), null,
-						ThemeHelper.isDark() ? IGamaColors.BLUE.color() : IGamaColors.TOOLTIP.color());
 				for (final int[] matchRegion : elementMatchRegions) {
-					textLayout.setStyle(boldStyle, matchRegion[0], matchRegion[1]);
+					textLayout.setStyle(getBoldStyle(), matchRegion[0], matchRegion[1]);
 				}
 
 				break;
@@ -176,22 +198,24 @@ public class GamlAccessEntry {
 	/**
 	 * Paint.
 	 *
-	 * @param event the event
-	 * @param textLayout the text layout
+	 * @param event
+	 *            the event
+	 * @param textLayout
+	 *            the text layout
 	 */
 	public void paint(final Event event, final TextLayout textLayout) {
 		final Table table = ((TableItem) event.item).getParent();
-		textLayout.setFont(table.getFont());
+
 		switch (event.index) {
 			case 0:
+				textLayout.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 				if (firstInCategory || providerMatchRegions.length > 0) {
 					// textLayout.setFont(GamaFonts.categoryHelpFont);
-					final TextStyle boldStyle = new TextStyle(WorkbenchHelper.getDisplay().getSystemFont(), null,
-							ThemeHelper.isDark() ? IGamaColors.BLUE.color() : IGamaColors.TOOLTIP.color());
+
 					textLayout.setText(provider.name);
 
 					for (final int[] matchRegion : providerMatchRegions) {
-						textLayout.setStyle(boldStyle, matchRegion[0], matchRegion[1]);
+						textLayout.setStyle(getCategoryStyle(), matchRegion[0], matchRegion[1]);
 					}
 
 					if (providerMatchRegions.length > 0 && !firstInCategory) {
@@ -204,13 +228,11 @@ public class GamlAccessEntry {
 				}
 				break;
 			case 1:
+				textLayout.setFont(table.getFont());
 				final String label = element.getTitle();
 				textLayout.setText(label);
-				final TextStyle boldStyle = new TextStyle(WorkbenchHelper.getDisplay().getSystemFont(), null,
-						ThemeHelper.isDark() ? IGamaColors.BLUE.color() : IGamaColors.TOOLTIP.color());
-
 				for (final int[] matchRegion : elementMatchRegions) {
-					textLayout.setStyle(boldStyle, matchRegion[0], matchRegion[1]);
+					textLayout.setStyle(getBoldStyle(), matchRegion[0], matchRegion[1]);
 				}
 
 				final Rectangle availableBounds = ((TableItem) event.item).getTextBounds(event.index);
@@ -242,8 +264,6 @@ public class GamlAccessEntry {
 	 *
 	 * @return Returns the match quality
 	 */
-	public int getMatchQuality() {
-		return matchQuality;
-	}
+	public int getMatchQuality() { return matchQuality; }
 
 }

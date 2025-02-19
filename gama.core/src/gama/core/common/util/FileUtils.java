@@ -805,7 +805,7 @@ public class FileUtils {
 		String pathName = constructRelativeTempFilePath(scope, url);
 		final String urlPath = url.toExternalForm();
 		final String status = "Downloading file " + urlPath.substring(urlPath.lastIndexOf(SEPARATOR));
-		scope.getGui().getStatus().beginSubStatus(scope, status);
+		scope.getGui().getStatus().beginTask(scope, status);
 		final Webb web = WEB.get();
 		try {
 			try (InputStream in = web.get(urlPath).ensureSuccess()
@@ -822,7 +822,7 @@ public class FileUtils {
 		} catch (final IOException | WebbException e) {
 			throw GamaRuntimeException.create(e, scope);
 		} finally {
-			scope.getGui().getStatus().endSubStatus(scope, status);
+			scope.getGui().getStatus().endTask(scope, status);
 		}
 		return pathName;
 	}

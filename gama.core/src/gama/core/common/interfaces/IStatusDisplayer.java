@@ -34,7 +34,7 @@ public interface IStatusDisplayer extends ITopLevelAgentChangeListener {
 	/**
 	 * Resume status.
 	 */
-	default void resumeStatus(final IScope scope) {}
+	default void resetStatus(final IScope scope) {}
 
 	/**
 	 * Wait status.
@@ -43,6 +43,12 @@ public interface IStatusDisplayer extends ITopLevelAgentChangeListener {
 	 *            the string
 	 */
 	default void waitStatus(final IScope scope, final String string) {}
+
+	default void waitStatus(final IScope scope, final String string, final Runnable run) {
+		waitStatus(scope, string);
+		run.run();
+		resetStatus(scope);
+	}
 
 	/**
 	 * Inform status.
@@ -66,17 +72,7 @@ public interface IStatusDisplayer extends ITopLevelAgentChangeListener {
 	 * @param status
 	 *            the new sub status completion
 	 */
-	default void setSubStatusCompletion(final IScope scope, final double status) {}
-
-	/**
-	 * Sets the status.
-	 *
-	 * @param msg
-	 *            the msg
-	 * @param color
-	 *            the color
-	 */
-	default void setStatus(final IScope scope, final String msg, final GamaColor color) {}
+	default void setTaskCompletion(final IScope scope, final double status) {}
 
 	/**
 	 * Inform status.
@@ -86,7 +82,7 @@ public interface IStatusDisplayer extends ITopLevelAgentChangeListener {
 	 * @param icon
 	 *            the icon
 	 */
-	default void informStatus(final IScope scope, final String message, final String icon) {}
+	default void updateExperimentStatus(final IScope scope) {}
 
 	/**
 	 * Sets the status.
@@ -96,7 +92,7 @@ public interface IStatusDisplayer extends ITopLevelAgentChangeListener {
 	 * @param icon
 	 *            the icon
 	 */
-	default void setStatus(final IScope scope, final String msg, final String icon) {}
+	default void setStatus(final IScope scope, final String message, final String icon, final GamaColor color) {}
 
 	/**
 	 * Begin sub status.
@@ -104,7 +100,7 @@ public interface IStatusDisplayer extends ITopLevelAgentChangeListener {
 	 * @param name
 	 *            the name
 	 */
-	default void beginSubStatus(final IScope scope, final String name) {}
+	default void beginTask(final IScope scope, final String name) {}
 
 	/**
 	 * End sub status.
@@ -112,14 +108,6 @@ public interface IStatusDisplayer extends ITopLevelAgentChangeListener {
 	 * @param name
 	 *            the name
 	 */
-	default void endSubStatus(final IScope scope, final String name) {}
-
-	/**
-	 * Neutral status.
-	 *
-	 * @param string
-	 *            the string
-	 */
-	default void neutralStatus(final IScope scope, final String string) {}
+	default void endTask(final IScope scope, final String name) {}
 
 }

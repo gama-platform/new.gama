@@ -5,9 +5,10 @@
          point="org.eclipse.ui.editors">
       <editor
             class="gaml.compiler.ui.GamlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
-            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            contributorClass="gama.ui.editor.GamlEditorActionContributor"
             default="true"
             extensions="gaml,experiment"
+            icon="platform:/plugin/gama.ui.shared/icons/navigator/files/file.model.png"
             id="gaml.compiler.Gaml"
             name="Gaml Editor">
          <contentTypeBinding
@@ -895,16 +896,6 @@
              class="gaml.compiler.ui.OverridingModule">
        </module>
     </extension>
-  <extension point="org.eclipse.team.core.fileTypes">
-    <fileTypes
-            extension="gaml"
-            type="text">
-    </fileTypes>
-    <fileTypes
-            extension="experiment"
-            type="text">
-    </fileTypes>
-  </extension>
   <extension
         point="org.eclipse.ui.bindings">
      <key

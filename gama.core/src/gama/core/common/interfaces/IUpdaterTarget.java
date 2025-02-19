@@ -22,21 +22,21 @@ public interface IUpdaterTarget<Message extends IUpdaterMessage> {
 	 *
 	 * @return true, if is disposed
 	 */
-	boolean isDisposed();
+	default boolean isDisposed() { return false; }
 
 	/**
 	 * Checks if is visible.
 	 *
 	 * @return true, if is visible
 	 */
-	boolean isVisible();
+	default boolean isVisible() { return true; }
 
 	/**
 	 * Checks if is busy.
 	 *
 	 * @return true, if is busy
 	 */
-	boolean isBusy();
+	default boolean isBusy() { return false; }
 
 	/**
 	 * Update with.
@@ -44,11 +44,11 @@ public interface IUpdaterTarget<Message extends IUpdaterMessage> {
 	 * @param m
 	 *            the m
 	 */
-	void updateWith(Message m);
+	default void updateWith(final Message m) {}
 
 	/**
 	 * Resume.
 	 */
-	void resume();
+	default void reset() {}
 
 }

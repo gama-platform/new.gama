@@ -329,7 +329,7 @@ public class ExperimentAgent extends GamlAgent implements IExperimentAgent {
 		if (!getSpecies().isBatch()) {
 			ownScope.getGui().setSelectedAgent(null);
 			ownScope.getGui().setHighlightedAgent(null);
-			ownScope.getGui().getStatus().resumeStatus(ownScope);
+			ownScope.getGui().getStatus().resetStatus(ownScope);
 			// AD: Fix for issue #1342 -- verify that it does not break
 			// something else in the dynamics of closing/opening
 			ownScope.getGui().closeDialogs(ownScope);
@@ -970,12 +970,12 @@ public class ExperimentAgent extends GamlAgent implements IExperimentAgent {
 	 * @author Alexis Drogoul (alexis.drogoul@ird.fr)
 	 * @date 24 sept. 2023
 	 */
-	private void informStatus() {
+	protected void informStatus() {
 		// TODO: should we keep that condition as we have specific IStatusDisplayer implementations ?
 		// Condition on the null simulation removed because of #273
-		if (isHeadless() || isBatch() /** || getSimulation() == null **/
+		if (isHeadless() /** || isBatch()|| getSimulation() == null **/
 		) return;
-		ownScope.getGui().getStatus().informStatus(ownScope, null, "overlays/status.clock");
+		ownScope.getGui().getStatus().updateExperimentStatus(ownScope);
 	}
 
 	/**

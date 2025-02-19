@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -64,7 +65,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -468,16 +468,7 @@ public class GamlEditor extends XtextEditor implements IGamlBuilderListener, IGa
 		gama.dev.DEBUG.OUT("Creating part control of " + this.getPartName());
 		configureTabFolder(compo);
 		toolbarParent = GamaToolbarFactory.createToolbars(this, compo);
-		final var layout = new GridLayout(1, false);
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		layout.marginLeft = 0;
-		layout.marginRight = -5;
-		toolbarParent.setLayout(layout);
-		// toolbarParent.setBackground(IGamaColors.WHITE.color());
-
+		GridLayoutFactory.fillDefaults().spacing(0, 0).extendedMargins(0, 5, 0, 0).applyTo(toolbarParent);
 		// Asking the editor to fill the rest
 		final var editor = new Composite(toolbarParent, SWT.NONE);
 		final var data = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -504,7 +495,6 @@ public class GamlEditor extends XtextEditor implements IGamlBuilderListener, IGa
 		});
 		toolbarParent.requestLayout();
 		installGestures();
-		// this.getStyledText().setEditable(!FLAGS.IS_READ_ONLY);
 	}
 
 	@Override
@@ -644,7 +634,6 @@ public class GamlEditor extends XtextEditor implements IGamlBuilderListener, IGa
 								SWT.LEFT);
 					}
 				}
-
 				toolbar.requestLayout();
 
 			});
@@ -1153,5 +1142,13 @@ public class GamlEditor extends XtextEditor implements IGamlBuilderListener, IGa
 	 * @param generateDiagramHandler
 	 */
 	public static void setDiagramOpener(final IDiagramOpener opener) { diagramOpener = opener; }
+
+	/**
+	 * @see gama.ui.shared.views.IGamlEditor#search()
+	 */
+	@Override
+	public void searchReference() {
+		// TODO
+	}
 
 }

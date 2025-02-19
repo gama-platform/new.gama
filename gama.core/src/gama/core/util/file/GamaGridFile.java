@@ -509,7 +509,7 @@ public class GamaGridFile extends GamaGisFile implements IFieldMatrixProvider {
 			coverage = store.read(null);
 		} finally {
 			if (store != null) { store.dispose(); }
-			scope.getGui().getStatus().endSubStatus(scope, "Opening file " + getName(scope));
+			scope.getGui().getStatus().endTask(scope, "Opening file " + getName(scope));
 		}
 	}
 
@@ -551,7 +551,7 @@ public class GamaGridFile extends GamaGisFile implements IFieldMatrixProvider {
 	void read(final IScope scope, final boolean readAll, final boolean createGeometries) {
 
 		try {
-			scope.getGui().getStatus().beginSubStatus(scope, "Reading file " + getName(scope));
+			scope.getGui().getStatus().beginTask(scope, "Reading file " + getName(scope));
 
 			final Envelope envP = gis == null ? scope.getSimulation().getEnvelope() : gis.getProjectedEnvelope();
 			if (gis != null && !(gis.getInitialCRS(scope) instanceof ProjectedCRS)) {
@@ -601,7 +601,7 @@ public class GamaGridFile extends GamaGisFile implements IFieldMatrixProvider {
 				records.y = new double[numRows * numCols]; // y
 				records.bands.add(new double[numRows * numCols]); // data
 				for (int i = 0, n = numRows * numCols; i < n; i++) {
-					scope.getGui().getStatus().setSubStatusCompletion(scope, i / (double) n);
+					scope.getGui().getStatus().setTaskCompletion(scope, i / (double) n);
 
 					final int yy = i / numCols;
 					final int xx = i - yy * numCols;
@@ -642,7 +642,7 @@ public class GamaGridFile extends GamaGisFile implements IFieldMatrixProvider {
 			throw GamaRuntimeException
 					.error("The format of " + getName(scope) + " is not correct. Error: " + e.getMessage(), scope);
 		} finally {
-			scope.getGui().getStatus().endSubStatus(scope, "Reading file " + getName(scope));
+			scope.getGui().getStatus().endTask(scope, "Reading file " + getName(scope));
 		}
 
 	}

@@ -15,10 +15,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.progress.UIJob;
 
-import gama.core.common.interfaces.IDisplaySurface;
 import gama.core.common.interfaces.IUpdaterMessage;
+import gama.core.common.interfaces.IUpdaterMessage.StatusType;
 import gama.core.common.interfaces.IUpdaterTarget;
-import gama.dev.DEBUG;
 
 /**
  * Class ThreadedUpdater.
@@ -29,15 +28,12 @@ import gama.dev.DEBUG;
  */
 public class ThreadedUpdater<Message extends IUpdaterMessage> extends UIJob implements IUpdaterTarget<Message> {
 
-	static {
-		DEBUG.ON();
-	}
-
 	/** The message. */
 	Message message = null;
 
-	/** The control. */
-	private IUpdaterTarget<Message> control;
+	/** The experimentControl. */
+	private IUpdaterTarget<Message> experimentControl = new IUpdaterTarget<>() {};
+	private IUpdaterTarget<Message> statusControl = new IUpdaterTarget<>() {};
 
 	/**
 	 * Instantiates a new threaded updater.
@@ -52,10 +48,10 @@ public class ThreadedUpdater<Message extends IUpdaterMessage> extends UIJob impl
 	}
 
 	@Override
-	public boolean isDisposed() { return control.isDisposed(); }
+	public boolean isDisposed() { return experimentControl.isDisposed() || statusControl.isDisposed(); }
 
 	@Override
-	public boolean isVisible() { return control.isVisible(); }
+	public boolean isVisible() { return experimentControl.isVisible() && statusControl.isVisible(); }
 
 	@Override
 	public void updateWith(final Message m) {
@@ -72,23 +68,39 @@ public class ThreadedUpdater<Message extends IUpdaterMessage> extends UIJob impl
 	 * @param s
 	 *            the s
 	 */
-	public void setTarget(final IUpdaterTarget<Message> l, final IDisplaySurface s) {
-		control = l;
+	public void setExperimentTarget(final IUpdaterTarget<Message> l) { experimentControl = l; }
+
+	public void setStatusTarget(final IUpdaterTarget<Message> l) { statusControl = l; }
+
+	@Override
+	public boolean isBusy() {
+		return false;
+
+		// message != null
+		// && (message.getType() == StatusType.EXPERIMENT && experimentControl.isBusy() || statusControl.isBusy());
 	}
 
 	@Override
-	public boolean isBusy() { return control.isBusy(); }
-
-	@Override
 	public IStatus runInUIThread(final IProgressMonitor monitor) {
-		if (control.isDisposed()) return Status.CANCEL_STATUS;
-		if (control.isBusy() || !control.isVisible()) return Status.OK_STATUS;
-		control.updateWith(message);
+		if (isDisposed()) return Status.CANCEL_STATUS;
+		try {
+			if (message != null && message.getType() == StatusType.EXPERIMENT) {
+				if (experimentControl.isBusy() || !experimentControl.isVisible()) return Status.OK_STATUS;
+				experimentControl.updateWith(message);
+			} else {
+				if (statusControl.isBusy() || !statusControl.isVisible()) return Status.OK_STATUS;
+				statusControl.updateWith(message);
+			}
+		} finally {
+			message = null;
+		}
 		return Status.OK_STATUS;
 	}
 
 	@Override
-	public void resume() {
-		control.resume();
+	public void reset() {
+		statusControl.reset();
+		experimentControl.reset();
 	}
+
 }
