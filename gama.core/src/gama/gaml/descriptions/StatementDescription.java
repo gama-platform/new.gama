@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * StatementDescription.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform
- * .
+ * StatementDescription.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -333,8 +332,7 @@ public class StatementDescription extends SymbolDescription {
 					}
 				}
 			} else if (hasFacet(FROM) && hasFacet(TO)) {
-				final IExpression expr = getFacetExpr(FROM);
-				if (expr != null) { t = expr.getGamlType(); }
+				t = GamaType.findCommonType(getFacetExpr(FROM), getFacetExpr(TO), getFacetExpr(STEP));
 			}
 		}
 

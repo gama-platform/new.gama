@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * LoopStatement.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform
- * (v.2.0.0).
+ * LoopStatement.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform (v.2.0.0).
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -10,8 +9,6 @@
  ********************************************************************************************************/
 package gama.gaml.statements;
 
-import gama.annotations.precompiler.IConcept;
-import gama.annotations.precompiler.ISymbolKind;
 import gama.annotations.precompiler.GamlAnnotations.doc;
 import gama.annotations.precompiler.GamlAnnotations.example;
 import gama.annotations.precompiler.GamlAnnotations.facet;
@@ -19,6 +16,8 @@ import gama.annotations.precompiler.GamlAnnotations.facets;
 import gama.annotations.precompiler.GamlAnnotations.inside;
 import gama.annotations.precompiler.GamlAnnotations.symbol;
 import gama.annotations.precompiler.GamlAnnotations.usage;
+import gama.annotations.precompiler.IConcept;
+import gama.annotations.precompiler.ISymbolKind;
 import gama.core.common.interfaces.IKeyword;
 import gama.core.runtime.FlowStatus;
 import gama.core.runtime.IScope;
@@ -414,9 +413,15 @@ public class LoopStatement extends AbstractStatementSequence implements Breakabl
 		super(desc);
 		final boolean isWhile = getFacet(IKeyword.WHILE) != null;
 		final boolean isList = getFacet(IKeyword.OVER) != null;
-		final boolean isBounded = getFacet(IKeyword.FROM) != null && getFacet(IKeyword.TO) != null;
+		IExpression from = getFacet(IKeyword.FROM);
+		IExpression to = getFacet(IKeyword.TO);
+		IExpression step = getFacet(IKeyword.STEP);
+		final boolean isBounded = from != null && to != null;
+		boolean isInt = isBounded && from.getGamlType() == Types.INT && to.getGamlType() == Types.INT
+				&& (step == null || step.getGamlType() == Types.INT);
 		varName = desc.getName();
-		executer = isWhile ? new While() : isList ? new Over() : isBounded ? new Bounded() : new Times();
+		executer = isWhile ? new While() : isList ? new Over()
+				: isBounded ? isInt ? new IntBounded(from, to, step) : new FloatBounded(from, to, step) : new Times();
 	}
 
 	@Override
@@ -482,31 +487,16 @@ public class LoopStatement extends AbstractStatementSequence implements Breakabl
 	/**
 	 * The Class Bounded.
 	 */
-	class Bounded implements LoopExecuter {
 
-		/** The from. */
-		private final IExpression from = getFacet(IKeyword.FROM);
+	class IntBounded implements LoopExecuter {
 
-		/** The to. */
-		private final IExpression to = getFacet(IKeyword.TO);
-
-		/** The step. */
-		private final IExpression step = getFacet(IKeyword.STEP);
-
+		private final IExpression from, to, step;
 		/** The constant step. */
-		private Number constantFrom;
-
-		/** The constant to. */
-		private Number constantTo;
-
-		/** The constant step. */
-		private Number constantStep;
+		private Integer constantFrom, constantTo;
+		private final Integer constantStep;
 
 		/** The step defined. */
 		private final boolean stepDefined;
-
-		/** The is int. */
-		private final boolean isInt;
 
 		/**
 		 * Instantiates a new bounded.
@@ -514,83 +504,40 @@ public class LoopStatement extends AbstractStatementSequence implements Breakabl
 		 * @throws GamaRuntimeException
 		 *             the gama runtime exception
 		 */
-		Bounded() throws GamaRuntimeException {
+		IntBounded(final IExpression from, final IExpression to, final IExpression step) throws GamaRuntimeException {
 			final IScope scope = null;
+			this.from = from;
+			this.to = to;
+			this.step = step;
 			// final IScope scope = GAMA.obtainNewScope();
-			isInt = from.getGamlType() == Types.INT && to.getGamlType() == Types.INT
-					&& (step == null || step.getGamlType() == Types.INT);
-			if (from.isConst()) { constantFrom = getFromExp(scope, from); }
-			if (to.isConst()) { constantTo = getFromExp(scope, to); }
-			if (step == null) {
-				stepDefined = false;
-				constantStep = 1;
-			} else if (step.isConst()) {
-				stepDefined = true;
-				constantStep = getFromExp(scope, step);
-			} else {
-				stepDefined = true;
-			}
+			if (from.isConst()) { constantFrom = Cast.asInt(scope, from.value(scope)); }
+			if (to.isConst()) { constantTo = Cast.asInt(scope, to.value(scope)); }
+			stepDefined = step != null;
+			constantStep = step == null ? 1 : step.isConst() ? Cast.asInt(scope, step.value(scope)) : null;
 		}
 
-		/**
-		 * Gets the from exp.
-		 *
-		 * @param scope
-		 *            the scope
-		 * @param exp
-		 *            the exp
-		 * @return the from exp
-		 */
-		Number getFromExp(final IScope scope, final IExpression exp) {
-			return isInt ? Cast.asInt(scope, exp.value(scope)) : Cast.asFloat(scope, exp.value(scope));
+		private Integer value(final IScope scope, final IExpression exp) {
+			return Cast.asInt(scope, exp.value(scope));
 		}
 
 		@Override
 		public Object runIn(final IScope scope) throws GamaRuntimeException {
 			final Object[] result = new Object[1];
-			final Number f = constantFrom == null ? getFromExp(scope, from) : constantFrom;
-			final Number t = constantTo == null ? getFromExp(scope, to) : constantTo;
-			Number s = constantStep == null ? getFromExp(scope, step) : constantStep;
+			final Integer f = constantFrom == null ? value(scope, from) : constantFrom;
+			final Integer t = constantTo == null ? value(scope, to) : constantTo;
+			Integer s = constantStep == null ? value(scope, step) : constantStep;
 			boolean shouldBreak = false;
 			if (f.equals(t)) {
 				loopBody(scope, f, result);
-			} else if (f.doubleValue() - t.doubleValue() > 0) {
-				if (s.doubleValue() > 0) {
-					if (stepDefined) return null;
-					if (s instanceof Integer) {
-						s = -s.intValue();
-					} else {
-						s = -s.doubleValue();
+			} else if (f > t) {
+				if (s > 0) {
+					if (stepDefined) {
+						loopBody(scope, f, result);
+						return result[0];
 					}
+					s = -s;
 				}
-				if (isInt) {
-					for (int i = f.intValue(), n = t.intValue(); i >= n && !shouldBreak; i += s.intValue()) {
-						FlowStatus status = loopBody(scope, i, result);
-						switch (status) {
-							case CONTINUE:
-								continue;
-							case BREAK, RETURN, DIE, DISPOSE:
-								shouldBreak = true;
-								break;
-							default:
-						}
-					}
-				} else {
-					for (double i = f.doubleValue(), n = t.doubleValue(); i >= n && !shouldBreak; i +=
-							s.doubleValue()) {
-						FlowStatus status = loopBody(scope, i, result);
-						switch (status) {
-							case CONTINUE:
-								continue;
-							case BREAK, RETURN, DIE, DISPOSE:
-								shouldBreak = true;
-								break;
-							default:
-						}
-					}
-				}
-			} else if (isInt) {
-				for (int i = f.intValue(), n = t.intValue(); i <= n && !shouldBreak; i += s.intValue()) {
+				for (int i = f, n = t; i >= n && !shouldBreak; i += s) {
 					FlowStatus status = loopBody(scope, i, result);
 					switch (status) {
 						case CONTINUE:
@@ -601,8 +548,9 @@ public class LoopStatement extends AbstractStatementSequence implements Breakabl
 						default:
 					}
 				}
+
 			} else {
-				for (double i = f.doubleValue(), n = t.doubleValue(); i <= n && !shouldBreak; i += s.doubleValue()) {
+				for (int i = f, n = t; i <= n && !shouldBreak; i += s) {
 					FlowStatus status = loopBody(scope, i, result);
 					switch (status) {
 						case CONTINUE:
@@ -616,6 +564,85 @@ public class LoopStatement extends AbstractStatementSequence implements Breakabl
 			}
 			return result[0];
 		}
+
+	}
+
+	class FloatBounded implements LoopExecuter {
+
+		private final IExpression from, to, step;
+		/** The constant step. */
+		private Double constantFrom, constantTo;
+		private final Double constantStep;
+
+		/** The step defined. */
+		private final boolean stepDefined;
+
+		/**
+		 * Instantiates a new bounded.
+		 *
+		 * @throws GamaRuntimeException
+		 *             the gama runtime exception
+		 */
+		FloatBounded(final IExpression from, final IExpression to, final IExpression step) throws GamaRuntimeException {
+			final IScope scope = null;
+			this.from = from;
+			this.to = to;
+			this.step = step;
+			// final IScope scope = GAMA.obtainNewScope();
+			if (from.isConst()) { constantFrom = value(scope, from); }
+			if (to.isConst()) { constantTo = value(scope, to); }
+			stepDefined = step != null;
+			constantStep = step == null ? 1d : step.isConst() ? value(scope, step) : null;
+		}
+
+		private Double value(final IScope scope, final IExpression exp) {
+			return Cast.asFloat(scope, exp.value(scope));
+		}
+
+		@Override
+		public Object runIn(final IScope scope) throws GamaRuntimeException {
+			final Object[] result = new Object[1];
+			final Double f = constantFrom == null ? value(scope, from) : constantFrom;
+			final Double t = constantTo == null ? value(scope, to) : constantTo;
+			Double s = constantStep == null ? value(scope, step) : constantStep;
+			boolean shouldBreak = false;
+			if (f.equals(t)) {
+				loopBody(scope, f, result);
+			} else if (f > t) {
+				if (s > 0) {
+					if (stepDefined) {
+						loopBody(scope, f, result);
+						return result[0];
+					}
+					s = -s;
+				}
+				for (double i = f, n = t; i >= n && !shouldBreak; i += s) {
+					FlowStatus status = loopBody(scope, i, result);
+					switch (status) {
+						case CONTINUE:
+							continue;
+						case BREAK, RETURN, DIE, DISPOSE:
+							shouldBreak = true;
+							break;
+						default:
+					}
+				}
+			} else {
+				for (double i = f, n = t; i <= n && !shouldBreak; i += s) {
+					FlowStatus status = loopBody(scope, i, result);
+					switch (status) {
+						case CONTINUE:
+							continue;
+						case BREAK, RETURN, DIE, DISPOSE:
+							shouldBreak = true;
+							break;
+						default:
+					}
+				}
+			}
+			return result[0];
+		}
+
 	}
 
 	/**
