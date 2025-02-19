@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * SpeciesDescription.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform
- * .
+ * SpeciesDescription.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -613,15 +612,23 @@ public class SpeciesDescription extends TypeDescription {
 					IGamlIssue.GENERAL);
 			return;
 		}
-		if (parent != null && parent != this && !parent.isBuiltIn() && parent.getJavaBase() != null) {
-			if (!parent.getJavaBase().isAssignableFrom(getJavaBase())) {
-				error("Species " + getName() + " Java base class (" + getJavaBase().getSimpleName()
-						+ ") is not a subclass of its parent species " + parent.getName() + " base class ("
-						+ parent.getJavaBase().getSimpleName() + ")", IGamlIssue.GENERAL);
+		if (parent != null && parent != this) {
+			if (!parent.isBuiltIn() && parent.getJavaBase() != null) {
+				if (!parent.getJavaBase().isAssignableFrom(getJavaBase())) {
+					error("Species " + getName() + " Java base class (" + getJavaBase().getSimpleName()
+							+ ") is not a subclass of its parent species " + parent.getName() + " base class ("
+							+ parent.getJavaBase().getSimpleName() + ")", IGamlIssue.GENERAL);
+				}
+				inheritMicroSpecies(parent);
 			}
-			if (!parent.isBuiltIn()) { inheritMicroSpecies(parent); }
+			// see #4
+			else if (!isBuiltIn() && isModel()) {
 
+				inheritMicroSpecies(parent);
+
+			}
 		}
+
 		super.inheritFromParent();
 
 	}

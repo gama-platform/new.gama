@@ -396,7 +396,7 @@ public class AgentsMenu extends ContributionItem {
 			final MenuAction... actions) {
 		final boolean isSimulations = species instanceof SimulationPopulation;
 		int subMenuSize = Math.max(2, GamaPreferences.Interface.CORE_MENU_SIZE.getValue());
-		final List<IAgent> agents = new ArrayList<>(species);
+		final List<IAgent> agents = species == null ? new ArrayList<>() : new ArrayList<>(species);
 		final int size = agents.size();
 		// if (size > 1 && !isSimulations) { GamaMenu.separate(menu, "Actions"); }
 		if (size >= 1) { browsePopulationMenuItem(menu, species, GamaIcon.named(IGamaIcons.MENU_BROWSE).image()); }
