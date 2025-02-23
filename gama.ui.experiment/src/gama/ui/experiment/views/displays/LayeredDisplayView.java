@@ -12,9 +12,6 @@ package gama.ui.experiment.views.displays;
 
 import java.awt.Color;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
@@ -90,7 +87,8 @@ public abstract class LayeredDisplayView extends GamaViewPart
 	 * The display semaphore. Acquired when the view is updating, supposed to be released when the actual surface has
 	 * been rendered
 	 */
-	protected GeneralSynchronizer displaySemaphore = GeneralSynchronizer.withInitialAndMaxPermits(1, 1);
+	protected GeneralSynchronizer syncSemaphore = GeneralSynchronizer.withInitialAndMaxPermits(1, 1);
+	// protected GeneralSynchronizer displaySemaphore = GeneralSynchronizer.withInitialAndMaxPermits(1, 1);
 
 	@Override
 	public void setIndex(final int index) { realIndex = index; }
@@ -344,22 +342,19 @@ public abstract class LayeredDisplayView extends GamaViewPart
 
 	@Override
 	protected Job createUpdateJob() {
-		return new Job(getTitle()) {
-
-			@Override
-			protected IStatus run(final IProgressMonitor monitor) {
-				final IDisplaySurface surface = getDisplaySurface();
-				if (surface != null && !disposed && !surface.isDisposed()) {
-					try {
-						surface.updateDisplay(false, displaySemaphore);
-					} catch (Exception e) {
-						DEBUG.OUT("Error when updating " + getTitle() + ": " + e.getMessage());
-					}
-				}
-				return Status.OK_STATUS;
-			}
-		};
+		return null;
 	}
+
+	// Thread updateThread = Thread.ofPlatform().name("Update thread of " + this.getPartName()).unstarted(() -> {
+	// while (getDisplaySurface() != null && !getDisplaySurface().isDisposed()) {
+	// try {
+	// getDisplaySurface().updateDisplay(false, syncSemaphore);
+	// } catch (Exception e) {
+	// DEBUG.OUT("Error when updating " + getTitle() + ": " + e.getMessage());
+	// }
+	// displaySemaphore.acquire();
+	// }
+	// });
 
 	/**
 	 * Update.
@@ -369,15 +364,28 @@ public abstract class LayeredDisplayView extends GamaViewPart
 	 */
 	@Override
 	public void update(final IOutput output) {
-		final Job job = getUpdateJob();
-		job.schedule();
+		if (getDisplaySurface() != null && !getDisplaySurface().isDisposed()) {
+			try {
+				getDisplaySurface().updateDisplay(false, syncSemaphore);
+			} catch (Exception e) {
+				DEBUG.OUT("Error when updating " + getTitle() + ": " + e.getMessage());
+			}
+			// displaySemaphore.acquire();
+		}
+		// if (!updateThread.isAlive()) {
+		// updateThread.start();
+		// t.start();
+		// final Job job = getUpdateJob();
+		// job.schedule();
+		// }
 		if (GAMA.isSynchronized() && !WorkbenchHelper.isDisplayThread()) {
 			// Should we put a time out in case ?
-			// displaySemaphore.tryAcquire(5, TimeUnit.SECONDS);
-			displaySemaphore.acquire();
+			// syncSemaphore.tryAcquire(5, TimeUnit.SECONDS);
+			syncSemaphore.acquire();
 		}
-
+		// displaySemaphore.release();
 		updateSnapshot();
+
 	}
 
 	/**
@@ -465,7 +473,8 @@ public abstract class LayeredDisplayView extends GamaViewPart
 
 	@Override
 	public void dispose() {
-		displaySemaphore.release();
+		syncSemaphore.release();
+		// displaySemaphore.release();
 		WorkbenchHelper.run(() -> {
 			if (getSite() != null) { getSite().getShell().removeControlListener(shellListener); }
 			super.dispose();

@@ -11,7 +11,7 @@
 (c) 2007-2008 IRD-UR GEODES (France) &amp; IFI-MSI (Vietnam)
 (c) 2009-2011 UMI 209 UMMISCO IRD/UPMC - MSI (Vietnam)
 (c) 2012-2017 UMI 209 UMMISCO IRD/UPMC &amp; Partners
-(c) 2018-2023 UMI 209 UMMISCO IRD/SU &amp; Partners
+(c) 2018-2025 UMI 209 UMMISCO IRD/SU &amp; Partners
       </text>
    </aboutInfo>
 
@@ -37,7 +37,7 @@
 -XX:+OptimizeStringConcat
 -Dosgi.locking=none
 -Dosgi.checkConfiguration=false
--Dosgi.requiredJavaVersion=21
+-Dosgi.requiredJavaVersion=23
 -Declipse.log.level=ERROR
 -Dorg.eclipse.ecf.provider.filetransfer.retrieve.retryAttempts=10
 -Dorg.eclipse.ecf.provider.filetransfer.retrieve.closeTimeout=6000
@@ -105,7 +105,9 @@
       </win>
    </launcher>
 
+
    <vm>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-23</windows>
    </vm>
 
    <license>

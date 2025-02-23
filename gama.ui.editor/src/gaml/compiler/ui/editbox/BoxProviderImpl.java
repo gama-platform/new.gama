@@ -1,12 +1,12 @@
 /*******************************************************************************************************
  *
- * BoxProviderImpl.java, in gama.ui.shared.modeling, is part of the source code of the
- * GAMA modeling and simulation platform .
+ * BoxProviderImpl.java, in gama.ui.shared.modeling, is part of the source code of the GAMA modeling and simulation
+ * platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
  * Visit https://github.com/gama-platform/gama for license information and contacts.
- * 
+ *
  ********************************************************************************************************/
 package gaml.compiler.ui.editbox;
 
@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import org.eclipse.core.text.StringMatcher;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.internal.misc.TextMatcher;
 
 /**
  * The Class BoxProviderImpl.
@@ -27,22 +27,22 @@ public class BoxProviderImpl implements IBoxProvider {
 
 	/** The id. */
 	protected String id;
-	
+
 	/** The name. */
 	protected String name;
-	
+
 	/** The editors settings. */
 	protected IBoxSettings editorsSettings;
-	
+
 	/** The settings store. */
 	protected BoxSettingsStoreImpl settingsStore;
-	
+
 	/** The builders. */
 	protected Map<String, Class> builders;
-	
+
 	/** The default settings catalog. */
 	protected Collection<String> defaultSettingsCatalog;
-	
+
 	/** The matchers. */
 	private ArrayList<Matcher> matchers;
 
@@ -73,9 +73,9 @@ public class BoxProviderImpl implements IBoxProvider {
 
 	@Override
 	public IBoxDecorator decorate(final IWorkbenchPart editorPart) {
-		if (!(editorPart instanceof IBoxEnabledEditor)) { return null; }
+		if (!(editorPart instanceof IBoxEnabledEditor)) return null;
 		final IBoxSettings settings = getEditorsBoxSettings();
-		if (!settings.getEnabled()) { return null; }
+		if (!settings.getEnabled()) return null;
 		((IBoxEnabledEditor) editorPart).createDecorator();
 		return ((IBoxEnabledEditor) editorPart).getDecorator();
 	}
@@ -89,14 +89,13 @@ public class BoxProviderImpl implements IBoxProvider {
 	/**
 	 * Supports file.
 	 *
-	 * @param fileName the file name
+	 * @param fileName
+	 *            the file name
 	 * @return true, if successful
 	 */
 	protected boolean supportsFile(final String fileName) {
 		if (fileName != null) {
-			for (final Matcher matcher : getMatchers()) {
-				if (matcher.matches(fileName)) { return true; }
-			}
+			for (final Matcher matcher : getMatchers()) { if (matcher.matches(fileName)) return true; }
 		}
 		return false;
 	}
@@ -110,42 +109,32 @@ public class BoxProviderImpl implements IBoxProvider {
 		if (matchers == null) {
 			matchers = new ArrayList<>();
 			final Collection<String> fileNames = getEditorsBoxSettings().getFileNames();
-			if (fileNames != null) {
-				for (final String pattern : fileNames) {
-					matchers.add(new Matcher(pattern));
-				}
-			}
+			if (fileNames != null) { for (final String pattern : fileNames) { matchers.add(new Matcher(pattern)); } }
 		}
 		return matchers;
 	}
 
 	@Override
-	public String getId() {
-		return id;
-	}
+	public String getId() { return id; }
 
 	@Override
-	public String getName() {
-		return name;
-	}
+	public String getName() { return name; }
 
 	/**
 	 * Sets the id.
 	 *
-	 * @param newId the new id
+	 * @param newId
+	 *            the new id
 	 */
-	public void setId(final String newId) {
-		id = newId;
-	}
+	public void setId(final String newId) { id = newId; }
 
 	/**
 	 * Sets the name.
 	 *
-	 * @param newName the new name
+	 * @param newName
+	 *            the new name
 	 */
-	public void setName(final String newName) {
-		name = newName;
-	}
+	public void setName(final String newName) { name = newName; }
 
 	/**
 	 * Creates the settings store.
@@ -161,11 +150,10 @@ public class BoxProviderImpl implements IBoxProvider {
 	/**
 	 * Sets the default settings catalog.
 	 *
-	 * @param cat the new default settings catalog
+	 * @param cat
+	 *            the new default settings catalog
 	 */
-	public void setDefaultSettingsCatalog(final Collection<String> cat) {
-		defaultSettingsCatalog = cat;
-	}
+	public void setDefaultSettingsCatalog(final Collection<String> cat) { defaultSettingsCatalog = cat; }
 
 	@Override
 	public IBoxSettings createSettings() {
@@ -191,26 +179,21 @@ public class BoxProviderImpl implements IBoxProvider {
 	}
 
 	@Override
-	public Collection<String> getBuilders() {
-		return builders != null ? builders.keySet() : null;
-	}
+	public Collection<String> getBuilders() { return builders != null ? builders.keySet() : null; }
 
 	/**
 	 * Sets the builders.
 	 *
-	 * @param newBuilders the new builders
+	 * @param newBuilders
+	 *            the new builders
 	 */
-	public void setBuilders(final Map<String, Class> newBuilders) {
-		builders = newBuilders;
-	}
+	public void setBuilders(final Map<String, Class> newBuilders) { builders = newBuilders; }
 
 	@Override
 	public IBoxBuilder createBoxBuilder(final String name) {
 		Class c = null;
-		if (name != null && builders != null) {
-			c = builders.get(name);
-		}
-		if (c == null) { return new BoxBuilderImpl(); }
+		if (name != null && builders != null) { c = builders.get(name); }
+		if (c == null) return new BoxBuilderImpl();
 		try {
 			return (IBoxBuilder) c.newInstance();
 		} catch (final Exception e) {
@@ -225,21 +208,23 @@ public class BoxProviderImpl implements IBoxProvider {
 	class Matcher {
 
 		/** The m. */
-		TextMatcher m;
+		StringMatcher m;
 
 		/**
 		 * Instantiates a new matcher.
 		 *
-		 * @param pattern the pattern
+		 * @param pattern
+		 *            the pattern
 		 */
 		Matcher(final String pattern) {
-			m = new TextMatcher(pattern, true, false);
+			m = new StringMatcher(pattern.trim(), true, false);
 		}
 
 		/**
 		 * Matches.
 		 *
-		 * @param text the text
+		 * @param text
+		 *            the text
 		 * @return true, if successful
 		 */
 		boolean matches(final String text) {
