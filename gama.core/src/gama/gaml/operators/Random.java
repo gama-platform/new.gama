@@ -584,7 +584,10 @@ public class Random {
 					"weibull_rnd" })
 	@test ("seed <- 1.0; rnd(10) = 8")
 	public static Integer opRnd(final IScope scope, final Integer max) {
-		return opRnd(scope, 0, max);
+		return opRnd(scope, 0, max, false);
+	}
+	public static Integer opRnd(final IScope scope, final Integer max, final Boolean opti) {
+		return opRnd(scope, 0, max, opti);
 	}
 
 	/**
@@ -612,8 +615,21 @@ public class Random {
 					"weibull_rnd" })
 	@test ("seed <- 1.0; rnd(1,5) = 4")
 	public static Integer opRnd(final IScope scope, final Integer min, final Integer max) {
+		return opRnd(scope, min, max, false);
+	}
+	
+	@operator (
+			value = "rnd",
+			category = { IOperatorCategory.RANDOM },
+			concept = { IConcept.RANDOM })
+	public static Integer opRnd(final IScope scope, final Integer min, final Integer max, final Boolean opti) {
 		final RandomUtils r = RANDOM(scope);
-		return r.between(min, max);
+		if (!opti.booleanValue()) {
+			return r.between(min, max);			
+		}
+		else {
+			return r.nextInt(max-min+1)+min;
+		}
 	}
 
 	/**

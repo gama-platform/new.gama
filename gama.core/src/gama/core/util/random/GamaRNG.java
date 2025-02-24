@@ -65,4 +65,13 @@ public class GamaRNG extends Random implements IGamaRNG {
 	@Override
 	public Random getRandomGenerator() { return this; }
 
+	@Override
+	public int nextInt(int origin, int bound) {
+		return super.nextInt(origin, bound);
+	}
+	@Override
+	public int nextInt(int bound) {
+		return super.nextInt(bound);
+	}
+
 }
