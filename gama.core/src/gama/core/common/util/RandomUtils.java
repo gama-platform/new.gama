@@ -190,7 +190,7 @@ public class RandomUtils {
 	 *
 	 * @return the gaussian generator
 	 */
-	public double createGaussian(final double mean, final double stdv) {
+	public double createGaussian(final double mean, final double stdv) { //TODO: check that this is counted in usage too
 		return generator.nextGaussian() * stdv + mean;
 	}
 
@@ -432,6 +432,25 @@ public class RandomUtils {
 		return val - low < high - val ? low : high;
 	}
 
+//	public int nextInt() {
+//		return generator.nextInt();
+//	}
+	
+	/**
+	 * Returns an integer between 0 (inclusive) and i (exclusive)
+	 * @param i
+	 * @return
+	 */
+	public int nextInt(int i) {
+		return generator.nextInt(i);
+	}
+	
+	public int nextInt(int lower, int upper) {
+		return generator.nextInt(lower, upper);
+	}
+	
+	
+	
 	/**
 	 * Next.
 	 *

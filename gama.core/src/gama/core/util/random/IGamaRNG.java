@@ -30,15 +30,33 @@ public interface IGamaRNG {
 	 *            the new usage
 	 */
 	default void setUsage(final int usage) {
-		for (long i = 0; i < usage; i++) { nextInt(); }
+		//TODO: If nextInt(nb) with nb a power of 2 we draw less than if not
+		// but this doesn't reflect on the rng_usage
+		for (long i = 0; i < usage; i++) { nextInt(32); }
 	}
 
+//	/**
+//	 * Next int.
+//	 *
+//	 * @return the int
+//	 */
+//	int nextInt();
+	
+	
 	/**
-	 * Next int.
-	 *
-	 * @return the int
+	 * Draws an int in the interval from 0 (inclusive) to upper_bound (exclusive) with uniform probability
+	 * @param i
+	 * @return
 	 */
-	int nextInt();
+	int nextInt(int upper_bound);
+	
+	/**
+	 * Draws an int in the interval lower (inclusive) to upper (exclusive)
+	 * @param lower
+	 * @param upper
+	 * @return
+	 */
+	int nextInt(int lower, int upper);
 
 	/**
 	 * Next double.

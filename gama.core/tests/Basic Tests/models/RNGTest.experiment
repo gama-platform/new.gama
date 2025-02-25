@@ -1,0 +1,242 @@
+/**
+* Name: RNGTest
+* This wizard creates a new test experiment 
+* Author: baptiste
+* Tags: 
+*/
+
+model rng_test
+
+species dummies {
+	
+}
+
+species walker skills:[moving]{
+}
+
+experiment RNGParent type: test virtual:true{
+	
+	string rng_name;
+	
+	setup {
+		rng <- rng_name;
+		seed <- 123.0;
+	}
+	
+	test "Resetting rng_usage"{
+		int i <- rnd(10);
+		assert rng_usage != 0;
+		
+		rng_usage <- 0;
+		assert rng_usage = 0;
+		
+		i <- rnd(10);
+		assert rng_usage != 0;
+		seed <- 1234.56;
+		assert rng_usage = 0;
+		
+		
+		i <- rnd(10);
+		assert rng_usage != 0;
+		rng <- rng_name;
+		assert rng_usage = 0;
+	}
+
+	
+	test "Setting rng_usage to a higher odd number"{
+		assert rng_usage = 0;
+		
+		rng_usage <- 5;
+		assert rng_usage = 5;
+	}
+	
+	test "Setting rng_usage to a higher even number"{
+		assert rng_usage = 0;
+		
+		rng_usage <- 6;
+		assert rng_usage = 6;
+	}
+	
+	test "Setting rng_usage to a lower even number"{
+		assert rng_usage = 0;
+		loop times:10{
+			int i <- rnd(0, 10);
+		}
+		assert rng_usage > 5;
+		rng_usage <- 4;
+		assert rng_usage = 4;
+	}
+	
+	test "Setting rng_usage to a lower odd number"{
+		assert rng_usage = 0;
+		loop times:10{
+			int i <- rnd(0, 10);
+		}
+		assert rng_usage > 5;
+		rng_usage <- 3;
+		assert rng_usage = 3;
+	}
+	
+	test "Setting rng_usage to a negative number"{
+		rng_usage <- -6;
+		assert rng_usage = 0;
+	}
+	
+	//TODO: rnd with a point
+	test "Check number draws rnd int" {
+		assert rng_usage = 0;
+		
+		int i <- rnd(123);
+		assert rng_usage = 1;
+		
+		
+		seed <- 123.0; // reset the rng 
+		i <- rnd(-2, 100);
+		assert rng_usage = 1;
+		
+	}
+	
+	
+	test "Check number draws rnd_choice list" {
+		int var0 <- rnd_choice([0.2,0.5,0.3]); 
+		assert rng_usage = 1;
+	}
+	
+	test "Check number draws rnd_choice map" {
+		unknown var1 <- rnd_choice(["toto"::0.2,"tata"::0.5,"tonton"::0.3]);
+		assert rng_usage = 1;
+	}
+	
+	test "Check number draws rnd float" {
+		float f <- rnd(10.0); // drawing a float should cost two rng draws
+		assert rng_usage = 2;
+		
+		seed <- 123.0; // reset the rng 
+		f <- rnd(-1, 10.0); // drawing a float should cost two rng draws
+		assert rng_usage = 2;
+	}
+	
+	
+	test "Check number of draws agent creation" {
+		create dummies; // each species has x and y float coordinates picked randomly so that's 2 times 2 draws = 4
+		assert rng_usage = 4; 
+	}
+	
+	
+	
+	test "Check number of draws for moving agents" {
+		create walker returns:r; // two random float coordinates so 4 draws
+		assert rng_usage = 4;
+		ask r {
+			do wander; // randomly moves to a new coordinate
+		}
+		assert rng_usage = 8;
+	}
+	
+	test "Check number of draws for one_of/any" {
+		int i <- one_of([1, 2, 3, 4]); // picking in a list should be equivalent to picking an int in a range
+		assert rng_usage = 1; 
+		
+				
+		seed <- 123.0; // reset the rng
+		i <- any([1, 2, 3, 4]); // picking in a list should be equivalent to picking an int in a range
+		assert rng_usage = 1; 
+	}
+	
+	test "Check number of draws for any_point_in/any_location_in" {
+		point p <- any_point_in(square(10)); // two random float coordinates so 4 draws
+		assert rng_usage = 4;
+		
+		seed <- 123.0; // reset the rng	
+		p <- any_location_in(square(10)); // two random float coordinates so 4 draws
+		assert rng_usage = 4;
+	}
+	
+	test "Check number of draws for binomial" {
+		int var0 <- binomial(15,0.6);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}
+	
+	test "Check number of draws for exp_rnd" {
+		float var0 <- exp_rnd(15);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}
+	
+	test "Check number of draws for exp_density" {
+		float var0 <- exp_density(15, 2);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}
+	
+	test "Check number of draws for flip" {
+		bool result <- flip(0.3);
+		assert rng_usage = 2; // because we draw a double
+	}
+	
+	test "Check number of draws for gamma_density" {
+		float var0 <- gamma_density(1, 5, 2);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}
+	
+	test "Check number of draws for gamma_rnd" {
+		float var0 <- gamma_rnd(1, 5);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}	
+	
+	test "Check number of draws for gamma_distribution" {
+		float var0 <- gamma_distribution(2, 3, 0);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}
+	
+	test "Check number of draws for gamma_distribution_complemented" {
+		float var0 <- gamma_distribution_complemented(2, 3, 0);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}
+	
+	test "Check number of draws for gamma_trunc_rnd" {
+		float var0 <- gamma_trunc_rnd(2, 3, 0, 5);
+		assert rng_usage = -2; // TODO: check which number makes sense
+	}
+	
+	//gauss, generate_terrain, lognormal_density, lognormal_rnd, lognormal_trunc_rnd, poisson, rnd, rnd_choice, sample, shuffle, skew_gauss, truncated_gauss, weibull_density, weibull_rnd, weibull_trunc_rnd,
+	// gamma_rnd, gauss_rnd, lognormal_rnd, poisson, rnd, skew_gauss, truncated_gauss, weibull_rnd, gauss,
+
+	// check values that do not make sense for the different operators
+
+	test "Check flip 0" {
+		assert flip(0) = false;
+	}
+
+	test "Check flip 1" {
+		assert flip(1) = true;
+	}
+	
+
+	test "Check flip negative" {
+		assert flip(-1) = false;
+	}
+	
+	test "Check flip above 1" {
+		assert flip(10) = true;
+		assert flip(11) = true;
+		assert flip(12) = true;
+		assert flip(13) = true;
+	}
+	
+	// TODO: non-regression tests: sample the 100 first results for some operators and store them in raw text in some variables then compare to runtime results
+}
+
+
+experiment RNGJava type:test autorun:true parent:RNGParent {
+	string rng_name <- "java";
+}
+
+
+experiment RNGMersenne type:test autorun:true parent:RNGParent {	
+	string rng_name <- "mersenne";		
+}
+
+experiment RNGParallel type:test autorun:true parent:RNGParent {	
+	string rng_name <- "parallel";		
+}	
+
+

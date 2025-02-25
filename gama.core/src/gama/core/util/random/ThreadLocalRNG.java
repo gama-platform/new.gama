@@ -34,10 +34,15 @@ public class ThreadLocalRNG implements IGamaRNG {
 	public int getUsage() { return 0; }
 
 	@Override
-	public int nextInt() {
-		return ThreadLocalRandom.current().nextInt();
+	public int nextInt(int i) {
+		return ThreadLocalRandom.current().nextInt(i);
 	}
 
+	@Override
+	public int nextInt(int lower, int upper) {
+		return ThreadLocalRandom.current().nextInt(lower, upper);
+	}
+	
 	@Override
 	public double nextDouble() {
 		return ThreadLocalRandom.current().nextDouble();
