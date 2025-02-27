@@ -112,8 +112,7 @@ public class DefaultExperimentController extends AbstractExperimentController {
 				try {
 					final boolean wasRunning = !isPaused() && !experiment.isAutorun();
 					paused = true;
-					scope.getGui().getStatus().waitStatus(scope, "Reloading...");
-					experiment.reload();
+					scope.getGui().getStatus().waitStatus(scope, "Reloading...", () -> experiment.reload());
 					if (wasRunning) return processUserCommand(ExperimentCommand._START);
 					scope.getGui().getStatus().informStatus(scope, "Experiment reloaded");
 					return true;
@@ -215,8 +214,9 @@ public class DefaultExperimentController extends AbstractExperimentController {
 		}
 		try {
 			if (scope == null) return;
-			if (!scope.step(agent).passed()) {
-				scope.setDisposeStatus();
+			IScope savedScope = scope;
+			if (!savedScope.step(agent).passed()) {
+				savedScope.setDisposeStatus();
 				paused = true;
 			}
 		} catch (RuntimeException e) {

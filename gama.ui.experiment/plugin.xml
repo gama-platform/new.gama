@@ -605,7 +605,7 @@
                   tooltip="  ">
             </command>
             <control
-                  class="gama.ui.experiment.controls.StatusControlContribution"
+                  class="gama.ui.experiment.controls.ExperimentControlContribution"
                   id="gama.application.status">
             </control>
             <command
@@ -1282,12 +1282,6 @@
             factoryClass="gama.ui.experiment.factories.SpeedDisplayerFactory">
          <service
                serviceClass="gama.ui.shared.interfaces.ISpeedDisplayer">
-         </service>
-      </serviceFactory>
-      <serviceFactory
-            factoryClass="gama.ui.experiment.factories.StatusDisplayerFactory">
-         <service
-               serviceClass="gama.core.common.interfaces.IStatusDisplayer">
          </service>
       </serviceFactory>
       <serviceFactory

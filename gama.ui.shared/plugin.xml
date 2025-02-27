@@ -409,6 +409,12 @@
                serviceClass="gama.ui.application.workbench.IPreferenceHelper">
          </service>
       </serviceFactory>
+      <serviceFactory
+            factoryClass="gama.ui.shared.factories.StatusDisplayerFactory">
+         <service
+               serviceClass="gama.core.common.interfaces.IStatusDisplayer">
+         </service>
+      </serviceFactory>
    </extension>
     <extension
           point="org.eclipse.ui.bindings">

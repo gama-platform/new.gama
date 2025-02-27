@@ -1,12 +1,11 @@
 /*******************************************************************************************************
  *
- * OverlayStatement.java, in gama.core, is part of the source code of the
- * GAMA modeling and simulation platform .
+ * OverlayStatement.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
  * Visit https://github.com/gama-platform/gama for license information and contacts.
- * 
+ *
  ********************************************************************************************************/
 package gama.core.outputs.layers;
 
@@ -14,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import gama.annotations.precompiler.IConcept;
-import gama.annotations.precompiler.ISymbolKind;
 import gama.annotations.precompiler.GamlAnnotations.doc;
 import gama.annotations.precompiler.GamlAnnotations.example;
 import gama.annotations.precompiler.GamlAnnotations.facet;
@@ -23,6 +20,8 @@ import gama.annotations.precompiler.GamlAnnotations.facets;
 import gama.annotations.precompiler.GamlAnnotations.inside;
 import gama.annotations.precompiler.GamlAnnotations.symbol;
 import gama.annotations.precompiler.GamlAnnotations.usage;
+import gama.annotations.precompiler.IConcept;
+import gama.annotations.precompiler.ISymbolKind;
 import gama.core.common.interfaces.IDisplaySurface;
 import gama.core.common.interfaces.IKeyword;
 import gama.core.common.interfaces.IOverlayProvider;
@@ -156,6 +155,9 @@ public class OverlayStatement extends GraphicLayerStatement implements IOverlayP
 			this.colors = colors;
 		}
 
+		@Override
+		public StatusType getType() { return StatusType.USER; }
+
 	}
 
 	/**
@@ -238,7 +240,7 @@ public class OverlayStatement extends GraphicLayerStatement implements IOverlayP
 	private String[] getValues() { return new String[] { leftValue, centerValue, rightValue }; }
 
 	@Override
-	public void setTarget(final IUpdaterTarget<OverlayInfo> overlay, final IDisplaySurface surface) {
+	public void setStatusTarget(final IUpdaterTarget<OverlayInfo> overlay, final IDisplaySurface surface) {
 		this.overlay = overlay;
 		_step(surface.getScope());
 	}

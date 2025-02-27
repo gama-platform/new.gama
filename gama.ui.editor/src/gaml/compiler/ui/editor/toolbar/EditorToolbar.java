@@ -23,6 +23,7 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.ToolItem;
 
 import gama.gaml.compilation.kernel.GamaBundleLoader;
+import gama.ui.shared.access.GamlAccessContents2;
 import gama.ui.shared.bindings.GamaKeyBindings;
 import gama.ui.shared.utils.WorkbenchHelper;
 import gama.ui.shared.views.toolbar.GamaToolbarSimple;
@@ -82,13 +83,14 @@ public class EditorToolbar {
 	public EditorSearchControls fill(final GamaToolbarSimple toolbar) {
 
 		previous = toolbar.button("editor/command.lastedit", null, "Previous edit location", globalPrevious);
-		next = toolbar.button("editor/command.nextedit", null, "Next edit location", globalNext);
+
 		find = new EditorSearchControls(editor).fill(toolbar);
+		next = toolbar.button("editor/command.nextedit", null, "Next edit location", globalNext);
 		toolbar.menu("editor/command.outline", null, "Show outline", e -> {
-			// final GamlEditor editor = getEditor();
 			if (editor == null) return;
 			editor.openOutlinePopup();
 		});
+
 		if (GamaBundleLoader.isDiagramEditorLoaded()) {
 			diagram = toolbar.button("editor/command.graphical", null, "Switch to diagram", e -> {
 				if (editor == null) return;
@@ -102,6 +104,44 @@ public class EditorToolbar {
 
 		// Attaching a focus listener to the search control to
 		hookToSearch(previous, next);
+
+		// ToolItem ref = toolbar.control(reference.createWidget(toolbar), 200);
+		// ref.getControl().setVisible(false);
+		// toolbar.update();
+		ToolItem button = toolbar.button("editor/command.find", null, "Search GAML reference", e -> {
+			final GamlAccessContents2 quickAccessDialog = new GamlAccessContents2();
+			quickAccessDialog.open();
+		});
+		// button.getControl().addMouseTrackListener(new MouseTrackListener() {
+		//
+		// @Override
+		// public void mouseHover(final MouseEvent e) {}
+		//
+		// @Override
+		// public void mouseExit(final MouseEvent e) {
+		//
+		// }
+		//
+		// @Override
+		// public void mouseEnter(final MouseEvent e) {
+		// ref.getControl().setVisible(true);
+		// }
+		// });
+		// ref.getControl().addMouseTrackListener(new MouseTrackListener() {
+		//
+		// @Override
+		// public void mouseHover(final MouseEvent e) {}
+		//
+		// @Override
+		// public void mouseExit(final MouseEvent e) {
+		// ref.getControl().setVisible(false);
+		// }
+		//
+		// @Override
+		// public void mouseEnter(final MouseEvent e) {
+		//
+		// }
+		// });
 
 		return find;
 	}

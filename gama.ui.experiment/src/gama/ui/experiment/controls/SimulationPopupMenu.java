@@ -79,7 +79,7 @@ public class SimulationPopupMenu extends PopupDialog {
 	final Listener hide = event -> hide();
 
 	/** The provider. */
-	private final StatusControlContribution status;
+	private final ExperimentControlContribution status;
 
 	/**
 	 * Instantiates a new popup 2.
@@ -92,7 +92,7 @@ public class SimulationPopupMenu extends PopupDialog {
 	/*
 	 *
 	 */
-	public SimulationPopupMenu(final StatusControlContribution status) {
+	public SimulationPopupMenu(final ExperimentControlContribution status) {
 		super(WorkbenchHelper.getShell(), PopupDialog.HOVER_SHELLSTYLE, false, false, false, false, false, null, null);
 		this.status = status;
 		final Shell shell = status.getControllingShell();

@@ -24,9 +24,9 @@ import org.eclipse.swt.widgets.Listener;
 import gama.core.runtime.GAMA;
 import gama.core.runtime.PlatformHelper;
 import gama.ui.application.workbench.PerspectiveHelper;
-import gama.ui.shared.access.GamlSearchField;
 import gama.ui.shared.utils.ViewsHelper;
 import gama.ui.shared.utils.WorkbenchHelper;
+import gama.ui.shared.views.IGamlEditor;
 
 /**
  * The purpose of this class is to install global key bindings that can work in any of the contexts of GAMA (incl.
@@ -105,7 +105,11 @@ public class GamaKeyBindings implements Listener {
 			case 'h':
 				if (ctrl(event) && shift(event)) {
 					consume(event);
-					GamlSearchField.INSTANCE.search();
+					IGamlEditor ed = WorkbenchHelper.getActiveEditor();
+					if (ed != null) {
+						ed.searchReference();
+						// GamlSearchField.INSTANCE.search();
+					}
 				}
 				break;
 			// Handles START, PAUSE & STEP

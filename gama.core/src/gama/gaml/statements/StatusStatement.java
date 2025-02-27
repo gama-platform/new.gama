@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * StatusStatement.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform
- * .
+ * StatusStatement.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -10,8 +9,6 @@
  ********************************************************************************************************/
 package gama.gaml.statements;
 
-import gama.annotations.precompiler.IConcept;
-import gama.annotations.precompiler.ISymbolKind;
 import gama.annotations.precompiler.GamlAnnotations.doc;
 import gama.annotations.precompiler.GamlAnnotations.example;
 import gama.annotations.precompiler.GamlAnnotations.facet;
@@ -19,6 +16,8 @@ import gama.annotations.precompiler.GamlAnnotations.facets;
 import gama.annotations.precompiler.GamlAnnotations.inside;
 import gama.annotations.precompiler.GamlAnnotations.symbol;
 import gama.annotations.precompiler.GamlAnnotations.usage;
+import gama.annotations.precompiler.IConcept;
+import gama.annotations.precompiler.ISymbolKind;
 import gama.core.common.interfaces.IKeyword;
 import gama.core.metamodel.agent.IAgent;
 import gama.core.runtime.IScope;
@@ -92,7 +91,8 @@ public class StatusStatement extends AbstractStatement {
 		if (agent != null && !agent.dead()) {
 			final Object o = message.value(scope);
 			final String msg = o == null ? null : Cast.asString(scope, o);
-			scope.getGui().getStatus().setStatus(scope, msg, color == null ? null : Cast.asColor(scope, color.value(scope)));
+			scope.getGui().getStatus().setStatus(scope, msg, null,
+					color == null ? null : Cast.asColor(scope, color.value(scope)));
 		}
 		return mes;
 	}

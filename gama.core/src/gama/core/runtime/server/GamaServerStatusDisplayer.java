@@ -54,31 +54,17 @@ public final class GamaServerStatusDisplayer extends GamaServerMessager implemen
 	}
 
 	@Override
-	public void setStatus(final IScope scope, final String msg, final GamaColor color) {
+	public void setStatus(final IScope scope, final String msg, final String icon, final GamaColor color) {
 		if (!canSendMessage(scope.getExperiment())) return;
-		sendMessage(scope.getExperiment(), json.object("message", msg, "color", color).toString(),
+		sendMessage(scope.getExperiment(), json.object("message", msg, "color", color, "icon", icon).toString(),
 				GamaServerMessage.Type.SimulationStatus);
 	}
 
 	@Override
-	public void informStatus(final IScope scope, final String message, final String icon) {
+	public void updateExperimentStatus(final IScope scope) {
 		if (!canSendMessage(scope.getExperiment())) return;
-		sendMessage(scope.getExperiment(), json.object("message", message, "icon", icon).toString(),
+		sendMessage(scope.getExperiment(), json.object("message", null, "icon", "overlays/status.clock").toString(),
 				GamaServerMessage.Type.SimulationStatusInform);
 	}
 
-	@Override
-	public void setStatus(final IScope scope, final String msg, final String icon) {
-		if (!canSendMessage(scope.getExperiment())) return;
-		sendMessage(scope.getExperiment(), json.object("message", msg, "icon", icon).toString(),
-				GamaServerMessage.Type.SimulationStatus);
-
-	}
-
-	@Override
-	public void neutralStatus(final IScope scope, final String string) {
-		if (!canSendMessage(scope.getExperiment())) return;
-		sendMessage(scope.getExperiment(), json.object("message", string).toString(),
-				GamaServerMessage.Type.SimulationStatusNeutral);
-	}
 }

@@ -103,21 +103,6 @@ public interface IGui {
 	/** The null snapshot maker. */
 	ISnapshotMaker NULL_SNAPSHOT_MAKER = new ISnapshotMaker() {};
 
-	/** The error. */
-	int ERROR = 0;
-
-	/** The wait. */
-	int WAIT = 1;
-
-	/** The inform. */
-	int INFORM = 2;
-
-	/** The neutral. */
-	int NEUTRAL = 3;
-
-	/** The user. */
-	int USER = 4;
-
 	/** The displays. */
 	Map<String, DisplayDescription> DISPLAYS = GamaMapFactory.createOrdered();
 

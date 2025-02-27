@@ -8,7 +8,7 @@
  * Visit https://github.com/gama-platform/gama for license information and contacts.
  *
  ********************************************************************************************************/
-package gama.ui.experiment.controls;
+package gama.ui.shared.controls;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.dialogs.PopupDialog;

@@ -147,11 +147,13 @@ public class SimulationOutputManager extends AbstractOutputManager {
 
 	@Override
 	public boolean init(final IScope scope) {
-		scope.getGui().getStatus().waitStatus(scope, " Building outputs ");
-		final boolean result = super.init(scope);
-		updateDisplayOutputsName(scope.getSimulation());
-		scope.getGui().getStatus().informStatus(scope, null, "overlays/status.clock");
-		return result;
+		boolean[] result = { true };
+		scope.getGui().getStatus().waitStatus(scope, " Building outputs ", () -> {
+			result[0] = super.init(scope);
+			updateDisplayOutputsName(scope.getSimulation());
+			scope.getGui().getStatus().updateExperimentStatus(scope);
+		});
+		return result[0];
 	}
 
 	/**

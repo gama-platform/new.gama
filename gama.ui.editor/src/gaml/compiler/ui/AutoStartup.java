@@ -1,7 +1,7 @@
 /*******************************************************************************************************
  *
- * AutoStartup.java, in gama.ui.shared.modeling, is part of the source code of the GAMA modeling and simulation
- * platform .
+ * AutoStartup.java, in gama.ui.shared.modeling, is part of the source code of the GAMA modeling and simulation platform
+ * .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -24,7 +24,7 @@ import gama.core.common.preferences.GamaPreferences;
 import gama.core.util.GamaColor;
 import gama.core.util.GamaFont;
 import gama.dev.DEBUG;
-import gama.ui.shared.utils.GamlReferenceSearch;
+import gama.ui.shared.access.HeapControl;
 import gaml.compiler.ui.editor.GamlEditorBindings;
 import gaml.compiler.ui.reference.OperatorsReferenceMenu;
 
@@ -78,7 +78,7 @@ public class AutoStartup implements IStartup {
 		});
 		// GamlRuntimeModule.staticInitialize();
 		GamlEditorBindings.install();
-		GamlReferenceSearch.install();
+		HeapControl.install();
 		DEBUG.OUT("Startup of editor plugin finished");
 	}
 

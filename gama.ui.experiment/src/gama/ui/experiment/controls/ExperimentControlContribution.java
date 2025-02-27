@@ -1,6 +1,6 @@
 /*******************************************************************************************************
  *
- * StatusControlContribution.java, in gama.ui.shared.experiment, is part of the source code of the GAMA modeling and
+ * ExperimentControlContribution.java, in gama.ui.shared.experiment, is part of the source code of the GAMA modeling and
  * simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
@@ -10,7 +10,6 @@
  ********************************************************************************************************/
 package gama.ui.experiment.controls;
 
-import static gama.core.runtime.GAMA.getCurrentTopLevelAgent;
 import static gama.ui.shared.resources.GamaColors.get;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -24,13 +23,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
-import gama.core.common.ErrorStatusMessage;
 import gama.core.common.StatusMessage;
-import gama.core.common.SubTaskMessage;
-import gama.core.common.UserStatusMessage;
-import gama.core.common.interfaces.IGui;
-import gama.core.common.interfaces.IStatusMessage;
-import gama.core.common.interfaces.IStatusMessage.StatusMessageType;
+import gama.core.common.interfaces.IStatusDisplayer;
 import gama.core.common.interfaces.IUpdaterTarget;
 import gama.core.kernel.experiment.IExperimentAgent;
 import gama.core.kernel.experiment.IExperimentPlan;
@@ -40,28 +34,23 @@ import gama.core.kernel.simulation.SimulationAgent;
 import gama.core.kernel.simulation.SimulationClock;
 import gama.core.kernel.simulation.SimulationPopulation;
 import gama.core.runtime.GAMA;
-import gama.core.runtime.exceptions.GamaRuntimeException;
-import gama.dev.DEBUG;
 import gama.gaml.operators.Strings;
 import gama.ui.shared.controls.FlatButton;
-import gama.ui.shared.resources.GamaColors;
-import gama.ui.shared.resources.GamaColors.GamaUIColor;
+import gama.ui.shared.factories.StatusDisplayer;
 import gama.ui.shared.resources.GamaIcon;
 import gama.ui.shared.resources.IGamaColors;
 import gama.ui.shared.resources.IGamaIcons;
 import gama.ui.shared.utils.WorkbenchHelper;
 
 /**
- * The Class StatusControlContribution.
+ * The Class ExperimentControlContribution.
  */
-public class StatusControlContribution extends WorkbenchWindowControlContribution
-		implements IUpdaterTarget<IStatusMessage> {
+public class ExperimentControlContribution extends WorkbenchWindowControlContribution
+		implements IUpdaterTarget<StatusMessage> {
 
 	static {
-		DEBUG.ON();
+		// DEBUG.ON();
 	}
-
-	GamaRuntimeException currentException;
 
 	/** The is updating. */
 	private volatile boolean isUpdating;
@@ -72,50 +61,29 @@ public class StatusControlContribution extends WorkbenchWindowControlContributio
 	/** The popup. */
 	private SimulationPopupMenu popup;
 
-	private ErrorPopUpMenu errorPopup;
-
-	/** The state. */
-	private int state;
-
-	/** The main task name. */
-	private volatile String mainTaskName;
-
-	/** The sub task name. */
-	private volatile String subTaskName;
-
-	/** The in sub task. */
-	private volatile boolean inSubTask = false;
-
-	/** The in user status. */
-	private volatile boolean inUserStatus = false;
-
-	/** The sub task completion. */
-	private volatile Double subTaskCompletion;
-
 	/** The Constant WIDTH. */
 	private final static int WIDTH = 400;
-
-	/** The color. */
-	private GamaUIColor color;
 
 	/** The text. */
 	private final StringBuilder text = new StringBuilder(2000);
 
 	/** The instance. */
-	static StatusControlContribution INSTANCE;
+	static ExperimentControlContribution INSTANCE;
 
 	/**
-	 * Gets the single instance of StatusControlContribution.
+	 * Gets the single instance of ExperimentControlContribution.
 	 *
-	 * @return single instance of StatusControlContribution
+	 * @return single instance of ExperimentControlContribution
 	 */
-	public static StatusControlContribution getInstance() { return INSTANCE; }
+	public static ExperimentControlContribution getInstance() { return INSTANCE; }
 
 	/**
 	 * Instantiates a new status control contribution.
 	 */
-	public StatusControlContribution() {
+	public ExperimentControlContribution() {
 		INSTANCE = this;
+		((StatusDisplayer) WorkbenchHelper.getService(IStatusDisplayer.class)).getThreadedUpdater()
+				.setExperimentTarget(this);
 	}
 
 	/**
@@ -124,9 +92,11 @@ public class StatusControlContribution extends WorkbenchWindowControlContributio
 	 * @param id
 	 *            the id
 	 */
-	public StatusControlContribution(final String id) { // NO_UCD (unused code)
+	public ExperimentControlContribution(final String id) { // NO_UCD (unused code)
 		super(id);
 		INSTANCE = this;
+		((StatusDisplayer) WorkbenchHelper.getService(IStatusDisplayer.class)).getThreadedUpdater()
+				.setExperimentTarget(this);
 	}
 
 	@Override
@@ -142,30 +112,19 @@ public class StatusControlContribution extends WorkbenchWindowControlContributio
 		final Composite compo = new Composite(parent, SWT.DOUBLE_BUFFERED);
 		GridLayoutFactory.fillDefaults().numColumns(1).equalWidth(false).applyTo(compo);
 		label = FlatButton.label(compo, IGamaColors.NEUTRAL, "No experiment running", WIDTH)
-				.setImage(GamaIcon.named(IGamaIcons.STATUS_CLOCK).image());
+				.setImage(GamaIcon.named(IGamaIcons.STATUS_CLOCK).image()).withMinimalHeight(24);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, true).hint(WIDTH, 24).applyTo(label);
 		popup = new SimulationPopupMenu(this);
-		errorPopup = new ErrorPopUpMenu(this);
 		label.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseDown(final MouseEvent e) {
 
-				if (state == IGui.ERROR) {
-					if (errorPopup.isVisible()) {
-						errorPopup.hide();
-					} else {
-						WorkbenchHelper.asyncRun(() -> errorPopup.display(currentException));
-					}
-					return;
-				}
-
 				if (popup.isVisible()) {
 					popup.hide();
 				} else {
 					final ITopLevelAgent agent = GAMA.getCurrentTopLevelAgent();
-					if (state != IGui.ERROR && state != IGui.WAIT && agent != null && !agent.dead()
-							&& !agent.getScope().isClosed() && agent.getExperiment() != null
+					if (agent != null && !agent.dead() && !agent.getScope().isClosed() && agent.getExperiment() != null
 							&& !(agent instanceof PlatformAgent)) {
 						WorkbenchHelper.asyncRun(popup::display);
 					}
@@ -256,116 +215,28 @@ public class StatusControlContribution extends WorkbenchWindowControlContributio
 	 * @see gama.gui.swt.controls.ThreadedUpdater.IUpdaterTarget#updateWith(java.lang.Object)
 	 */
 	@Override
-	public void updateWith(final IStatusMessage m) {
+	public void updateWith(final StatusMessage m) {
 		if (isUpdating) return;
-		prepareForUpdate();
-		StatusMessageType type = m.getType();
-		switch (type) {
-			case ERROR:
-				processErrorStatusMessage((ErrorStatusMessage) m);
-				break;
-			case USER:
-				processUserStatusMessage((UserStatusMessage) m);
-				break;
-			case STATUS:
-				if (inUserStatus) return;
-				processStatusMessage((StatusMessage) m);
-				break;
-			case SUBTASK:
-				if (inUserStatus) return;
-				processSubTaskMessage((SubTaskMessage) m);
-		}
-		label.setImageWithoutRecomputingSize(m.getIcon() == null ? null : GamaIcon.named(m.getIcon()).image());
-		label.setColor(getLabelBackground());
-		label.setTextWithoutRecomputingSize(getLabelText());
-		if (popup.isVisible()) { popup.display(); }
-		isUpdating = false;
-		inUserStatus = false;
-	}
-
-	private String getSubTaskMessage() {
-		return subTaskName + (subTaskCompletion != null ? " [" + (int) (subTaskCompletion * 100) + "%]" : "");
-	}
-
-	private String getLabelText() {
-		return inSubTask ? getSubTaskMessage() : mainTaskName == null ? getClockMessage() : mainTaskName;
-	}
-
-	/**
-	 * Gets the popup background.
-	 *
-	 * @author Alexis Drogoul (alexis.drogoul@ird.fr)
-	 * @return the popup background
-	 * @date 26 août 2023
-	 */
-	// @Override
-	public GamaUIColor getLabelBackground() {
-		if (inUserStatus) {
-			if (color != null) return color;
-		} else if (!inSubTask && mainTaskName == null) return get(getCurrentTopLevelAgent().getColor());
-		return state == IGui.ERROR ? IGamaColors.ERROR : state == IGui.WAIT ? IGamaColors.WARNING
-				: state == IGui.NEUTRAL ? IGamaColors.NEUTRAL : IGamaColors.OK;
-	}
-
-	private void processErrorStatusMessage(final ErrorStatusMessage esm) {
-		inSubTask = false; // in case
-		state = IGui.ERROR;
-		mainTaskName = "Error in previous experiment";
-		currentException = esm.getException();
-	}
-
-	private void processStatusMessage(final StatusMessage sm) {
-		inSubTask = false; // in case
-		mainTaskName = sm.getText();
-		state = sm.getCode();
-	}
-
-	private void processUserStatusMessage(final UserStatusMessage usm) {
-		final String s = usm.getText();
-		if (s == null) {
-			resume();
-		} else {
-			inSubTask = false; // in case
-			inUserStatus = true;
-			final java.awt.Color c = usm.getColor();
-			if (c == null) {
-				color = null;
-				state = IGui.NEUTRAL;
+		try {
+			isUpdating = true;
+			// DEBUG.OUT("Updating with current experiment " + GAMA.getExperiment());
+			if (GAMA.getExperiment() == null) {
+				label.removeMenuSign();
+				popup.wipe();
+				if (popup.isVisible()) { popup.hide(); }
 			} else {
-				color = GamaColors.get(c);
+				label.addMenuSign();
 			}
-			mainTaskName = usm.getText();
+			ITopLevelAgent agent = GAMA.getCurrentTopLevelAgent();
+			label.setImageWithoutRecomputingSize(m.icon() == null ? null : GamaIcon.named(m.icon()).image());
+			label.setColor(get(agent.getColor()));
+			label.setTextWithoutRecomputingSize(getClockMessage(agent));
+			if (popup.isVisible()) { popup.display(); }
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			isUpdating = false;
 		}
-	}
-
-	private void processSubTaskMessage(final SubTaskMessage m2) {
-		final Boolean beginOrEnd = m2.getBeginOrEnd();
-		if (beginOrEnd == null) {
-			// completion
-			subTaskCompletion = m2.getCompletion();
-		} else {
-			if (beginOrEnd) {
-				// begin task
-				subTaskName = m2.getText();
-				inSubTask = true;
-			} else {
-				// end task
-				inSubTask = false;
-			}
-			subTaskCompletion = null;
-		}
-	}
-
-	private void prepareForUpdate() {
-		currentException = null;
-		if (GAMA.getExperiment() == null) {
-			label.removeMenuSign();
-			popup.wipe();
-			if (popup.isVisible()) { popup.hide(); }
-		} else {
-			label.addMenuSign();
-		}
-		isUpdating = true;
 	}
 
 	/**
@@ -377,8 +248,7 @@ public class StatusControlContribution extends WorkbenchWindowControlContributio
 	 * @return the clock message
 	 * @date 26 août 2023
 	 */
-	private String getClockMessage() {
-		ITopLevelAgent agent = GAMA.getCurrentTopLevelAgent();
+	private String getClockMessage(final ITopLevelAgent agent) {
 		if (agent == null) return "";
 		if (agent instanceof PlatformAgent) return "No experiment running";
 		final IExperimentAgent exp = agent.getExperiment();
@@ -398,13 +268,9 @@ public class StatusControlContribution extends WorkbenchWindowControlContributio
 	/**
 	 * Method resume()
 	 *
-	 * @see gama.core.common.interfaces.IUpdaterTarget#resume()
+	 * @see gama.core.common.interfaces.IUpdaterTarget#reset()
 	 */
 	@Override
-	public void resume() {
-		inUserStatus = false;
-		color = null;
-		mainTaskName = null;
-	}
+	public void reset() {}
 
 }

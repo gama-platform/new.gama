@@ -1,7 +1,7 @@
 /*******************************************************************************************************
  *
- * EditorSearchControls.java, in gama.ui.shared.modeling, is part of the source code of the GAMA modeling and
- * simulation platform .
+ * EditorSearchControls.java, in gama.ui.shared.modeling, is part of the source code of the GAMA modeling and simulation
+ * platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -132,6 +132,7 @@ public class EditorSearchControls {
 			@Override
 			public void keyPressed(final KeyEvent e) {
 				if (e.character == SWT.ESC) { editor.setFocus(); }
+				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) { findNext(); }
 			}
 		});
 		this.adjustEnablement(false, null);

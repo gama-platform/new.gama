@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TypedListener;
 
 import gama.dev.DEBUG;
+import gama.ui.application.workbench.ThemeHelper;
 import gama.ui.shared.resources.GamaColors;
 import gama.ui.shared.resources.GamaColors.GamaUIColor;
 import gama.ui.shared.resources.GamaIcon;
@@ -63,10 +64,12 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 	private RGB colorCode;
 
 	/** The preferred height. */
-	private int preferredHeight = -1; // DEFAULT_HEIGHT;
+	private int preferredHeight = SWT.DEFAULT; // DEFAULT_HEIGHT;
+
+	private int minimalHeight = SWT.DEFAULT;
 
 	/** The preferred width. */
-	private int preferredWidth = -1;
+	private int preferredWidth = SWT.DEFAULT;
 
 	/** The enabled. */
 	private boolean enabled = true;
@@ -78,10 +81,11 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 	private boolean down = false;
 
 	/** The forced width. */
-	private int forcedWidth = -1;
+	private int forcedWidth = SWT.DEFAULT;
 
 	/** The right padding */
 	private int rightPadding = 0;
+	private boolean border;
 
 	/**
 	 * Creates the.
@@ -126,7 +130,7 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 	 */
 	public static FlatButton label(final Composite comp, final GamaUIColor color, final String text,
 			final int forcedWidth) {
-		return create(comp, SWT.None).setWidth(forcedWidth).setText(text).setColor(color);
+		return create(comp, SWT.None).withWidth(forcedWidth).setText(text).setColor(color);
 	}
 
 	/**
@@ -295,14 +299,26 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 		GamaUIColor color = GamaColors.get(colorCode);
 		Color background = color == null ? getParent().getBackground() : hovered ? color.lighter() : color.color();
 		final Color foreground = GamaColors.getTextColorForBackground(background).color();
-		gc.setForeground(foreground);
-		gc.setBackground(background);
 
+		gc.setBackground(background);
 		if (down) {
 			gc.fillRoundRectangle(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2, 8, 8);
+			if (border) {
+				final Color borderColor = ThemeHelper.isDark() ? GamaColors.get(background).lighter()
+						: GamaColors.get(background).darker();
+				gc.setForeground(borderColor);
+				gc.drawRoundRectangle(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2, 8, 8);
+			}
 		} else {
 			gc.fillRoundRectangle(rect.x, rect.y, rect.width, rect.height, 8, 8);
+			if (border) {
+				final Color borderColor = ThemeHelper.isDark() ? GamaColors.get(background).lighter()
+						: GamaColors.get(background).darker();
+				gc.setForeground(borderColor);
+				gc.drawRoundRectangle(rect.x, rect.y, rect.width, rect.height, 8, 8);
+			}
 		}
+		gc.setForeground(foreground);
 
 		int x = innerMarginWidth;
 		final Image im = getImage();
@@ -476,6 +492,7 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 		}
 		preferredWidth += rightPadding;
 		if (forcedWidth > 0) { preferredWidth = forcedWidth; }
+		if (minimalHeight > preferredHeight) { preferredHeight = minimalHeight; }
 	}
 
 	/**
@@ -597,9 +614,15 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 	 *            the width
 	 * @return the flat button
 	 */
-	public FlatButton setWidth(final int width) {
+	public FlatButton withWidth(final int width) {
 		forcedWidth = width;
 		preferredWidth = width;
+		return this;
+	}
+
+	public FlatButton withMinimalHeight(final int height) {
+		minimalHeight = height;
+		preferredHeight = height;
 		return this;
 	}
 
@@ -622,7 +645,7 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 	 */
 	@Override
 	public void setBounds(final int x, final int y, final int width, final int height) {
-		setWidth(width);
+		withWidth(width);
 		super.setBounds(x, y, width, height);
 	}
 
@@ -639,5 +662,10 @@ public class FlatButton extends Canvas implements PaintListener, Listener {
 	 *            the new padding
 	 */
 	public void setRightPadding(final int buttonPadding) { rightPadding = buttonPadding; }
+
+	public FlatButton withBorder() {
+		border = true;
+		return this;
+	}
 
 }

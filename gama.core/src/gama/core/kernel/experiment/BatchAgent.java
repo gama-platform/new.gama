@@ -23,6 +23,7 @@ import org.jfree.data.statistics.Statistics;
 import gama.annotations.precompiler.GamlAnnotations.doc;
 import gama.annotations.precompiler.GamlAnnotations.experiment;
 import gama.core.common.interfaces.IKeyword;
+import gama.core.common.interfaces.IUpdaterMessage;
 import gama.core.kernel.batch.exploration.AExplorationAlgorithm;
 import gama.core.kernel.batch.optimization.AOptimizationAlgorithm;
 import gama.core.kernel.experiment.IParameter.Batch;
@@ -527,14 +528,14 @@ public class BatchAgent extends ExperimentAgent {
 
 	}
 
-	boolean pairIcon;
-
 	private void informStatus(final SimulationPopulation pop, final int repeatIndex) {
-		getScope().getGui().getStatus().setStatus(getScope(),
-				"Run " + runNumber + " | " + repeatIndex + "/" + seeds.length + " simulations (using "
-						+ pop.getNumberOfActiveThreads() + " threads)",
-				"overlays/small.exp.batch.white" + (pairIcon ? "2" : ""));
-		pairIcon = !pairIcon;
+		getScope().getGui().getStatus()
+				.setStatus(
+						getScope(), "Run " + runNumber + " | " + repeatIndex + "/" + seeds.length
+								+ " simulations (using " + pop.getNumberOfActiveThreads() + " threads)",
+						IUpdaterMessage.PROGRESS_ICON, null);// GamaColor.get("light_gray")
+
+		// informStatus();
 	}
 
 	/**

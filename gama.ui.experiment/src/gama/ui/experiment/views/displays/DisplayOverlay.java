@@ -266,7 +266,7 @@ public class DisplayOverlay implements IUpdaterTarget<OverlayInfo> {
 		c.getShell().addShellListener(listener);
 		// parentShell.addControlListener(listener);
 		c.addControlListener(listener);
-		if (provider != null) { provider.setTarget(new ThreadedOverlayUpdater(this), view.getDisplaySurface()); }
+		if (provider != null) { provider.setStatusTarget(new ThreadedOverlayUpdater(this), view.getDisplaySurface()); }
 		// if (GamaPreferences.Displays.CORE_SHOW_FPS.getValue()) {
 		timer.schedule(new FPSTask(), 0, 1000);
 		// }
@@ -508,10 +508,10 @@ public class DisplayOverlay implements IUpdaterTarget<OverlayInfo> {
 	/**
 	 * Method resume()
 	 *
-	 * @see gama.core.common.interfaces.IUpdaterTarget#resume()
+	 * @see gama.core.common.interfaces.IUpdaterTarget#reset()
 	 */
 	@Override
-	public void resume() {}
+	public void reset() {}
 
 	/**
 	 * Gets the popup.
