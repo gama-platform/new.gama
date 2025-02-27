@@ -14,11 +14,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import gama.annotations.precompiler.GamlProperties;
 import gama.annotations.precompiler.GamlAnnotations.doc;
 import gama.annotations.precompiler.GamlAnnotations.type;
 import gama.annotations.precompiler.GamlAnnotations.variable;
 import gama.annotations.precompiler.GamlAnnotations.vars;
+import gama.annotations.precompiler.GamlProperties;
 import gama.core.common.interfaces.IValue;
 import gama.core.runtime.IScope;
 import gama.core.runtime.exceptions.GamaRuntimeException;
@@ -516,6 +516,10 @@ public abstract class GamaType<Support> implements IType<Support> {
 			final IType<?>[] array = types.items().toArray(new IType[types.size()]);
 			return findCommonType(array);
 		}
+	}
+
+	public static IType<?> findCommonType(final IExpression... elements) {
+		return findCommonType(elements, TYPE);
 	}
 
 	/**
