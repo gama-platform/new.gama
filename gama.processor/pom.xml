@@ -24,12 +24,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tycho.version>4.0.8</tycho.version>
+		<tycho.version>4.0.11</tycho.version>
 		<jdk.version>21</jdk.version>
 		<codehaus.wagon.version>2.0.2</codehaus.wagon.version>
 		<wagon.version>3.5.3</wagon.version>
-		<maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-		<maven.plugins.version>3.0.0</maven.plugins.version>
+		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+		<maven.plugins.version>3.1.0</maven.plugins.version>
 		
 		<sonar.organization>gama-platform</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>

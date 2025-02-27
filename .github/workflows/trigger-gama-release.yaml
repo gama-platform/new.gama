@@ -17,7 +17,7 @@ on:
         description: "Choose a JDK version to embed inside GAMA release"
         type: string
         required: true
-        default: 21.0.3+9
+        default: 21.0.6+7
       releaseGithubOnly:
         description: "Release only on Github (not on Microsoft Stores, else) ?"
         type: boolean

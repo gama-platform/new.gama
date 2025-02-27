@@ -25,7 +25,7 @@
 	<repositories>
 		<repository>
 			<id>eclipse-swt</id>
-			<url>https://download.eclipse.org/releases/2024-06</url>
+			<url>https://download.eclipse.org/releases/2025-03/202501311001/</url>
 			<layout>p2</layout>
 			<releases>
 				<enabled>true</enabled>
@@ -189,12 +189,12 @@
 	<properties>
 		<project.version>0.0.0-SNAPSHOT</project.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tycho.version>4.0.8</tycho.version>
+		<tycho.version>4.0.11</tycho.version>
 		<jdk.version>21</jdk.version>
 		<codehaus.wagon.version>2.0.2</codehaus.wagon.version>
 		<wagon.version>3.5.3</wagon.version>
-		<maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-		<maven.plugins.version>3.0.0</maven.plugins.version>
+		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+		<maven.plugins.version>3.1.0</maven.plugins.version>
 		
 		<sonar.organization>gama-platform</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
