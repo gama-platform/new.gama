@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * TypesManager.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform
- * .
+ * TypesManager.java, in gama.core, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -79,15 +78,16 @@ public class TypesManager implements ITypesManager {
 	@Override
 	public IType<? extends IAgent> addSpeciesType(final SpeciesDescription species) {
 		final String name = species.getName();
-		if (!IKeyword.AGENT.equals(name)) {
-			if (containsType(name)) {
-				species.error("Species " + name + " already declared. Species name must be unique",
-						IGamlIssue.DUPLICATE_NAME, species.getUnderlyingElement(), name);
-			}
-			return addSpeciesType(new GamaAgentType(species, species.getName(), ++CURRENT_INDEX,
-					(Class<IAgent>) species.getJavaBase()), species.getJavaBase());
+		if (IKeyword.AGENT.equals(name)) return (IType<? extends IAgent>) get(IKeyword.AGENT);
+		if (!species.isBuiltIn() && containsType(name)) {
+			species.error("Species " + name + " already declared. Species name must be unique",
+					IGamlIssue.DUPLICATE_NAME, species.getUnderlyingElement(), name);
+			return (IType<? extends IAgent>) this.get(name);
 		}
-		return (IType<? extends IAgent>) get(IKeyword.AGENT);
+		return addSpeciesType(
+				new GamaAgentType(species, species.getName(), ++CURRENT_INDEX, (Class<IAgent>) species.getJavaBase()),
+				species.getJavaBase());
+
 	}
 
 	@Override

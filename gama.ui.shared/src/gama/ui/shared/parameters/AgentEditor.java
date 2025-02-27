@@ -1,7 +1,6 @@
 /*******************************************************************************************************
  *
- * AgentEditor.java, in gama.ui.shared.shared, is part of the source code of the GAMA modeling and simulation platform
- * .
+ * AgentEditor.java, in gama.ui.shared.shared, is part of the source code of the GAMA modeling and simulation platform .
  *
  * (c) 2007-2024 UMI 209 UMMISCO IRD/SU & Partners (IRIT, MIAT, TLU, CTU)
  *
@@ -18,6 +17,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
+import gama.core.common.interfaces.IKeyword;
 import gama.core.kernel.experiment.IParameter;
 import gama.core.metamodel.agent.IAgent;
 import gama.gaml.types.IType;
@@ -51,7 +51,6 @@ public class AgentEditor extends ExpressionBasedEditor {
 	 */
 	AgentEditor(final IAgent agent, final IParameter param, final EditorListener l) {
 		super(agent, param, l);
-		species = param.getType().toString();
 	}
 
 	@Override
@@ -78,7 +77,8 @@ public class AgentEditor extends ExpressionBasedEditor {
 		if (a != null) {
 			final IAgentMenuFactory factory = WorkbenchHelper.getService(IAgentMenuFactory.class);
 			if (factory != null) {
-				factory.fillPopulationSubMenu(dropMenu, a.getSimulation().getMicroPopulation(species), null, action);
+				factory.fillPopulationSubMenu(dropMenu, a.getSimulation().getMicroPopulation(getSpecies()), null,
+						action);
 			}
 		}
 		final Rectangle rect = editorToolbar.getItem(CHANGE).getBounds();
@@ -89,7 +89,10 @@ public class AgentEditor extends ExpressionBasedEditor {
 	}
 
 	@Override
-	public IType getExpectedType() { return getScope().getType(species); }
+	public IType getExpectedType() {
+		String s = getSpecies();
+		return IKeyword.MODEL.equals(s) ? getScope().getSimulation().getSpecies().getGamlType() : getScope().getType(s);
+	}
 
 	/**
 	 * Method getToolItems()
@@ -103,6 +106,11 @@ public class AgentEditor extends ExpressionBasedEditor {
 	protected void applyInspect() {
 		if (currentValue instanceof IAgent a && !a.dead()) { getScope().getGui().setSelectedAgent(a); }
 
+	}
+
+	String getSpecies() {
+		if (species == null) { species = param.getType().getSpeciesName(); }
+		return species;
 	}
 
 }
