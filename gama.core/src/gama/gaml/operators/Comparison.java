@@ -47,7 +47,9 @@ public class Comparison {
 			if (arguments.length > 1) {
 				final IType<?> t1 = arguments[0].getGamlType();
 				final IType<?> t2 = arguments[1].getGamlType();
-				if (t1.id() == IType.NONE || t2.id() == IType.NONE || t1.isTranslatableInto(t2) || t2.isTranslatableInto(t1)) return true;
+				if (t1.id() == IType.NONE || t2.id() == IType.NONE || t1.isTranslatableInto(t2)
+						|| t2.isTranslatableInto(t1))
+					return true;
 				context.warning(
 						"This equality will always return false because you are comparing a " + t1 + " with a " + t2,
 						IGamlIssue.UNMATCHED_OPERANDS, emfContext);
@@ -428,7 +430,7 @@ public class Comparison {
 					equals = "true") })
 	public static Boolean greaterOrEqual(final Double a, final Double b) {
 		if (a == null || b == null) return false;
-		return (a >= b);
+		return a >= b;
 	}
 
 	/**
@@ -527,7 +529,7 @@ public class Comparison {
 					equals = "true") })
 	public static Boolean lessOrEqual(final Double a, final Double b) {
 		if (a == null || b == null) return false;
-		return (a <= b);
+		return a <= b;
 	}
 
 	/**
@@ -664,6 +666,36 @@ public class Comparison {
 		if (b == null) return false;
 		return !IntervalSize.isZeroWidth(a, b);
 		// return a < b || a > b;
+	}
+
+	/**
+	 * Different.
+	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
+	 * @return the boolean
+	 */
+	@operator (
+			value = { "!=" },
+			can_be_const = true,
+			category = { IOperatorCategory.COMPARISON },
+			concept = { IConcept.COMPARISON })
+	@doc (
+			value = "true if both operands are different, false otherwise",
+			masterDoc = true,
+			examples = { @example (
+					value = "3 != 3",
+					equals = "false"),
+					@example (
+							value = "4 != 5",
+							equals = "true") },
+			see = { "=", GT, LT, GTE, LTE, "=" })
+	public static Boolean different(final Integer a, final Integer b) {
+		if (a == null) return b != null;
+		if (b == null) return false;
+		return a.intValue() != b.intValue();
 	}
 
 	/**
